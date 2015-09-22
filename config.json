@@ -1,0 +1,30 @@
+{
+   "connectorTypes": {
+       "Http": "./connectors/http-connector",
+       "VacuumPump": "./connectors/vacuum-pump-connector"
+   },
+
+   "cloudConnectors": {
+       "wc-http": {
+           "type": "Http",
+           "config": {
+               "pollFrequency": 2000,
+               "url": "https://api-iot.analoggarage.com",
+               "headers": {
+                   "apiKey": "witchcraft",
+                   "content-type": "application/json"
+               },
+               "mac": "rasp-test-01"
+           }
+       }
+   },
+
+   "deviceConnectors": {
+       "wc-vp-1": {
+           "type": "VacuumPump",
+           "config": {
+               "pollFrequency": 1000
+           }
+       }
+   }
+}

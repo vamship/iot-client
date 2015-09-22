@@ -1,0 +1,22 @@
+{
+  "name": "witchcraft-client",
+  "version": "1.0.0",
+  "description": "Reference client implementation for witchcraft (raspberry pi)",
+  "main": "app/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "IOT",
+    "raspberry",
+    "pi"
+  ],
+  "author": "Vamshi Ponnapalli <vamshi.ponnapalli@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "clone": "^1.0.2",
+    "iot-client-lib": "git+https://github.com/vamship/iot-client-lib.git",
+    "node-clone": "^0.1.1",
+    "unirest": "^0.4.2"
+  }
+}
