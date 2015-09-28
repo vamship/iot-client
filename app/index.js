@@ -3,18 +3,33 @@
 
 var _iotLib = require('iot-client-lib');
 
+var _config = require('./config');
+var _logger = require('./logger').getLogger('app');
+
+_logger.info('Ready to go');
 var controller = new _iotLib.Controller({
-    moduleBasePath: __dirname
+    moduleBasePath: GLOBAL.config.cfg_module_base_path
 });
 
 controller.init('./config.json').then(function() {
-    console.log('Configuration successfully loaded');
+    _logger.info('Configuration successfully loaded');
 }, function(err) {
-    console.log('Error loading configuration: ', err);
+    _logger.error('Error loading configuration: ', err);
 });
 
 
 setTimeout(function() {
-    console.log('Stopping');
-    controller.stop();
-}, 30000);
+    _logger.info('Stopping app');
+    controller.stop().then(function() {
+        _dumpConnectors(controller.getCloudConnectors());
+        _dumpConnectors(controller.getDeviceConnectors());
+    });
+}, 5 * 60 * 1000);
+
+
+function _dumpConnectors(connectors) {
+    for(var id in connectors) {
+        console.log(id, '::', connectors[id].connector._state,
+                                connectors[id].actionPending);
+    }
+};

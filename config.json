@@ -8,7 +8,7 @@
        "wc-http": {
            "type": "Http",
            "config": {
-               "pollFrequency": 2000,
+               "pollFrequency": 10000,
                "url": "https://api-iot.analoggarage.com",
                "headers": {
                    "apiKey": "witchcraft",
@@ -23,7 +23,14 @@
        "wc-vp-1": {
            "type": "VacuumPump",
            "config": {
-               "pollFrequency": 1000
+               "pollFrequency": 5000,
+               "portName": "/dev/tty.usbserial-FTGPJQKL",
+               "baudRate": 9600,
+               "parity": "none",
+               "stopBits": 1,
+               "dataBits": 8,
+               "flowControl": false
+
            }
        }
    }

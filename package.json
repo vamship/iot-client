@@ -17,6 +17,9 @@
     "clone": "^1.0.2",
     "iot-client-lib": "git+https://github.com/vamship/iot-client-lib.git",
     "node-clone": "^0.1.1",
-    "unirest": "^0.4.2"
+    "q": "^1.4.1",
+    "serialport": "^1.7.4",
+    "unirest": "^0.4.2",
+    "winston": "^1.0.1"
   }
 }
