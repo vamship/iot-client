@@ -16,20 +16,3 @@ controller.init('./config.json').then(function() {
 }, function(err) {
     _logger.error('Error loading configuration: ', err);
 });
-
-
-setTimeout(function() {
-    _logger.info('Stopping app');
-    controller.stop().then(function() {
-        _dumpConnectors(controller.getCloudConnectors());
-        _dumpConnectors(controller.getDeviceConnectors());
-    });
-}, 5 * 60 * 1000);
-
-
-function _dumpConnectors(connectors) {
-    for(var id in connectors) {
-        console.log(id, '::', connectors[id].connector._state,
-                                connectors[id].actionPending);
-    }
-};
