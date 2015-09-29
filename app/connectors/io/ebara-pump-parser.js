@@ -12,9 +12,10 @@ var SENSOR_MAP = {
     '3': 'coolingWaterFlow',
     '4': 'sealN2Flow',
     '5': 'diluentN2Flow',
-    '6': 'bpMotorPressure',
-    '7': 'mpMotorPressure',
-    '8': 'boxTemperature'
+    '6': 'vacPressure',
+    '7': 'bpMotorPressure',
+    '8': 'mpMotorPressure',
+    ';': 'boxTemperature'
 };
 
 /**
@@ -82,7 +83,7 @@ EbaraPumpParser.prototype._parseResponse = function(data) {
 
         if(index === 0) {
             this._populateTimestamp(payload, tokens);
-        } else if (index>1) {
+        } else if (index>1 && index<12) {
             this._populateSensorData(payload, tokens);
         }
     }
@@ -103,6 +104,8 @@ EbaraPumpParser.prototype.getParser = function() {
             if(this._lastByte === CR && nextByte === LF) {
                 var buf = new Buffer(this._currentLine);
                 var line = buf.toString('ascii');
+
+                this.debug('Pump data: %s', line);
 
                 if(line === 'END') {
                     emitter.emit('data', this._parseResponse(this._lines));
