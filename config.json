@@ -30,7 +30,6 @@
                "stopBits": 1,
                "dataBits": 8,
                "flowControl": false
-
            }
        }
    }
