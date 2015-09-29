@@ -100,6 +100,13 @@ VacuumPumpConnector.prototype._start = function() {
         flowControl: this._config.flowControl,
         parser: this._ebaraPump.getParser()
     });
+    if(typeof this._config.pumpRequestTimeout !== 'number' ||
+        this._config.pumpRequestTimeout <= 0) {
+        def.reject('Pump request timeout parameter not valid: ' +
+                                        this._config.pumpRequestTimeout);
+        return;
+    }
+    this._requestTimeout = this._config.pumpRequestTimeout;
 
     //NOTE: Explicitly opening the port is causing the process not to terminate
     // after execution. It appears that this method is creating a reference that
