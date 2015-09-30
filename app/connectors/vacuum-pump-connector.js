@@ -81,7 +81,8 @@ VacuumPumpConnector.prototype._dataHandler = function(data) {
  * @private
  */
 VacuumPumpConnector.prototype._errorHandler = function(err) {
-    this.error('Error occurred on port:', err);
+    this.error('Error occurred when communicating on the port: %s', err);
+    this._ebaraPump.reset();
 };
 
 /**

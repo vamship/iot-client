@@ -26,9 +26,7 @@ var SENSOR_MAP = {
  * @constructor
  */
 function EbaraPumpParser(id) {
-    this._lines = [];
-    this._currentLine = [];
-    this._lastByte = null;
+    this.reset();
 
     var logger = _logger.getLogger(id);
     logger.extend(this);
@@ -90,8 +88,23 @@ EbaraPumpParser.prototype._parseResponse = function(data) {
     return payload;
 }
 
+
+/**
+ * Resets the parser, discarding any unprocessed data that has been received
+ * from the pump
+ *
+ * @class EbaraPumpParser
+ * @method reset
+ */
+EbaraPumpParser.prototype.reset = function() {
+    this._lines = [];
+    this._currentLine = [];
+    this._lastByte = null;
+};
+
 /**
  * Returns a parser handler for serial port communication
+ *
  * @class EbaraPumpParser
  * @method getParser
  * @return {Function} A function that can be used with a node-serialport
