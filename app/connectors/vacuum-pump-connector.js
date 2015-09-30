@@ -42,10 +42,10 @@ _util.inherits(VacuumPumpConnector, PollingConnector);
 VacuumPumpConnector.prototype._getResolver = function(def, operation) {
     return function(err) {
         if(err) {
-            this.error('operation failed: %s', operation);
+            this.error('operation failed: [%s]', operation);
             def.reject(err);
         } else {
-            this.info('operation succeeded: %s', operation);
+            this.info('operation succeeded: [%s]', operation);
             def.resolve();
         }
     }.bind(this);
@@ -58,16 +58,21 @@ VacuumPumpConnector.prototype._getResolver = function(def, operation) {
  */
 VacuumPumpConnector.prototype._dataHandler = function(data) {
     if(!data || typeof data !== 'object') {
-        this.error('Invalid data received from serial port. Expected object, got: %s', (typeof data));
+        this.error('Invalid data received from serial port. Expected object, got: [%s]', (typeof data));
         return;
     }
 
-    this.emit('data', {
+    var payload = {
         id: this._id,
-        data: payload
-    });
+        data: data
+    };
 
-    this.info('Resetting request pending flag and auto timeout');
+    this.info('Emitting sensor data for node');
+    this.verbose('Sensor data: ', payload);
+
+    this.emit('data', payload);
+
+    this.debug('Resetting request pending flag and auto timeout');
     this._requestPending = false;
     if(this._requestResetHandle) {
         clearTimeout(this._requestResetHandle);
@@ -81,7 +86,7 @@ VacuumPumpConnector.prototype._dataHandler = function(data) {
  * @private
  */
 VacuumPumpConnector.prototype._errorHandler = function(err) {
-    this.error('Error occurred when communicating on the port: %s', err);
+    this.error('Error occurred when communicating on the port: ', err);
     this._ebaraPump.reset();
 };
 
@@ -91,7 +96,9 @@ VacuumPumpConnector.prototype._errorHandler = function(err) {
  * @protected
  */
 VacuumPumpConnector.prototype._start = function() {
-    this.verbose('Initializing connector:', this._config);
+    this.info('Initializing connector');
+    this.verbose('Connector config: ', this._config);
+
     var def = _q.defer();
     this._port = new SerialPort(this._config.portName, {
         baudrate: this._config.baudRate,
@@ -100,7 +107,8 @@ VacuumPumpConnector.prototype._start = function() {
         databits: this._config.dataBits,
         flowControl: this._config.flowControl,
         parser: this._ebaraPump.getParser()
-    });
+    }, false);
+
     if(typeof this._config.pumpRequestTimeout !== 'number' ||
         this._config.pumpRequestTimeout <= 0) {
         def.reject('Pump request timeout parameter not valid: ' +
@@ -109,17 +117,12 @@ VacuumPumpConnector.prototype._start = function() {
     }
     this._requestTimeout = this._config.pumpRequestTimeout;
 
-    //NOTE: Explicitly opening the port is causing the process not to terminate
-    // after execution. It appears that this method is creating a reference that
-    // is not getting cleared.
-    //this._port.open(this._getResolver(def, 'open'));
-
-    this._port.on('open', function(err) {
+    this._port.open(function(err) {
         if(err) {
-            this.error('Error opening port [%s]. Details: [%s]', this._config.portName, err);
+            this.error('Error opening port [%s]. Details: ', this._config.portName, err.toString());
             return def.reject(err);
         }
-        this.info('Port open [%s]. Attaching event handlers', this._config.portName);
+        this.info('Port open [%s]. Attaching event handlers.', this._config.portName);
         this._port.on('data', this._dataHandler.bind(this));
         this._port.on('error', this._errorHandler.bind(this));
         def.resolve();
@@ -140,15 +143,15 @@ VacuumPumpConnector.prototype._stop = function() {
     var def = _q.defer();
     var promise = def.promise;
     if(this._port && this._port.isOpen()) {
-        this.info('Closing port: %s', this._config.portName);
+        this.info('Closing port: [%s]', this._config.portName);
         this._port.drain();
-        this._port.close(this._getResolver(def, 'close'));
+        this._port.close(this._getResolver(def, 'close port: [' + this._config.portName + ']'));
         promise = def.promise.then(function() {
-            this.info('Port closed: %s', this._config.portName);
+            this.info('Port closed: [%s]', this._config.portName);
             this._port = null;
         }.bind(this));
     } else {
-        this.info('Port not open: %s', this._config.portName);
+        this.info('Port not open: [%s]', this._config.portName);
         def.resolve();
     }
 
@@ -170,9 +173,9 @@ VacuumPumpConnector.prototype._process = function() {
         }
         this._port.write(this._connectMessage, function(err, data) {
             if(err) {
-                this.error('Error writing data on port: %s. Details: %s', this._config.portName, err);
+                this.error('Error writing data on port: [%s]. Details: ', this._config.portName, err);
             } else {
-                this.verbose('Command successfully sent to pump. Result: %s', data);
+                this.verbose('Command successfully sent to pump. Result: [%s]', data);
             }
         }.bind(this));
 

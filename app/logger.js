@@ -39,7 +39,6 @@ module.exports = {
             return meta;
         });
 
-        logger.cli();
         return logger;
     }
 };

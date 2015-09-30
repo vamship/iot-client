@@ -15,4 +15,10 @@ controller.init('./config.json').then(function() {
     _logger.info('Configuration successfully loaded');
 }, function(err) {
     _logger.error('Error loading configuration: ', err);
-});
+    controller.stop().fin(function(err) {
+        if(err) {
+            _logger.error('Error stopping program: %s', err);
+        }
+        _logger.info('Program stopped');
+    });
+}).done();
