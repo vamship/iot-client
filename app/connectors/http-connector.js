@@ -4,7 +4,6 @@
 var _util = require('util');
 var _unirest = require('unirest');
 var PollingConnector = require('iot-client-lib').PollingConnector;
-var _logger = require('../logger');
 
 /**
  * Connector that can make HTTP requests at a predetermined frequency.
@@ -15,9 +14,6 @@ var _logger = require('../logger');
  */
 function HttpConnector(id) {
     HttpConnector.super_.call(this, id)
-
-    var logger = _logger.getLogger(id);
-    logger.extend(this);
 }
 
 _util.inherits(HttpConnector, PollingConnector);
@@ -63,7 +59,7 @@ HttpConnector.prototype._process = function() {
     if(!payload) {
         //TODO: Log message here.
         //No data to send
-        this.info('No data to send');
+        this._logger.info('No data to send');
         return;
     }
 
@@ -72,16 +68,16 @@ HttpConnector.prototype._process = function() {
         request = request.header(header, this._config.headers[header]);
     }
 
-    this.info('Sending data to cloud');
-    this.verbose('Payload: ', payload);
+    this._logger.info('Sending data to cloud');
+    this._logger.verbose('Payload: ', payload);
     request.send(JSON.stringify(payload))
         .end(function(response) {
             if(response.ok) {
-                this.info('Request processed successfully');
+                this._logger.info('Request processed successfully');
             } else {
                 //TODO: log message here
                 //Error posting data to server.
-                this.error('Error posting data to server. Status: [%s]. Body:', response.status, response.body);
+                this._logger.error('Error posting data to server. Status: [%s]. Body:', response.status, response.body);
             }
         }.bind(this));
 };

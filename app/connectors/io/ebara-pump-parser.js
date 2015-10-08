@@ -27,9 +27,7 @@ var SENSOR_MAP = {
  */
 function EbaraPumpParser(id) {
     this.reset();
-
-    var logger = _logger.getLogger(id);
-    logger.extend(this);
+    this._logger = _logger.getLogger(id);
 }
 
 /**
@@ -44,7 +42,7 @@ EbaraPumpParser.prototype._populateTimestamp = function(payload, tokens) {
     if(matches && matches.length && matches.length > 2) {
         timestamp = Date.parse(matches[1] + ' ' + matches[2]);
         if(isNaN(timestamp)) {
-            this.warn('Unable to parse timestamp: [%s]', tokens[0]);
+            this._logger.warn('Unable to parse timestamp: [%s]', tokens[0]);
         } else {
             payload.timestamp = timestamp;
         }
@@ -61,7 +59,7 @@ EbaraPumpParser.prototype._populateSensorData = function(payload, tokens) {
     if(sensor) {
         payload[sensor] = parseFloat(tokens[1]);
     } else {
-        this.warn('Unable to find sensor with id: [%s]', tokens[0]);
+        this._logger.warn('Unable to find sensor with id: [%s]', tokens[0]);
     }
 };
 
@@ -118,7 +116,7 @@ EbaraPumpParser.prototype.getParser = function() {
                 var buf = new Buffer(this._currentLine);
                 var line = buf.toString('ascii');
 
-                this.verbose('Pump data: [%s]', line);
+                this._logger.verbose('Pump data: [%s]', line);
 
                 if(line === 'END') {
                     emitter.emit('data', this._parseResponse(this._lines));

@@ -4,12 +4,13 @@
 var _iotLib = require('iot-client-lib');
 
 var _config = require('./config');
-var _logger = require('./logger').getLogger('app');
+var _loggerProvider = require('./logger');
+var _logger = _loggerProvider.getLogger('app');
 
 _logger.info('Ready to go');
 var controller = new _iotLib.Controller({
     moduleBasePath: GLOBAL.config.cfg_module_base_path
-});
+}, _loggerProvider);
 
 controller.init('./config.json').then(function() {
     _logger.info('Configuration successfully loaded');
