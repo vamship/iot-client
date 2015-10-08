@@ -116,7 +116,7 @@ EbaraPumpParser.prototype.getParser = function() {
                 var buf = new Buffer(this._currentLine);
                 var line = buf.toString('ascii');
 
-                this._logger.verbose('Pump data: [%s]', line);
+                this._logger.debug('Pump data: [%s]', line);
 
                 if(line === 'END') {
                     emitter.emit('data', this._parseResponse(this._lines));

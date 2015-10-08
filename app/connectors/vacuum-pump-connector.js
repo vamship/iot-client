@@ -63,7 +63,7 @@ VacuumPumpConnector.prototype._dataHandler = function(data) {
     };
 
     this._logger.info('Emitting sensor data for node');
-    this._logger.verbose('Sensor data: ', payload);
+    this._logger.debug('Sensor data: ', payload);
 
     this.emit('data', payload);
 
@@ -92,7 +92,7 @@ VacuumPumpConnector.prototype._errorHandler = function(err) {
  */
 VacuumPumpConnector.prototype._start = function() {
     this._logger.info('Initializing connector');
-    this._logger.verbose('Connector config: ', this._config);
+    this._logger.debug('Connector config: ', this._config);
 
     var def = _q.defer();
     this._port = new SerialPort(this._config.portName, {
@@ -134,7 +134,7 @@ VacuumPumpConnector.prototype._start = function() {
  * @protected
  */
 VacuumPumpConnector.prototype._stop = function() {
-    this._logger.verbose('Stopping connector');
+    this._logger.info('Stopping connector');
     var def = _q.defer();
     var promise = def.promise;
     if(this._port && this._port.isOpen()) {
@@ -170,7 +170,7 @@ VacuumPumpConnector.prototype._process = function() {
             if(err) {
                 this._logger.error('Error writing data on port: [%s]. Details: ', this._config.portName, err);
             } else {
-                this._logger.verbose('Command successfully sent to pump. Result: [%s]', data);
+                this._logger.debug('Command successfully sent to pump. Result: [%s]', data);
             }
         }.bind(this));
 

@@ -69,7 +69,7 @@ HttpConnector.prototype._process = function() {
     }
 
     this._logger.info('Sending data to cloud');
-    this._logger.verbose('Payload: ', payload);
+    this._logger.debug('Payload: ', payload);
     request.send(JSON.stringify(payload))
         .end(function(response) {
             if(response.ok) {
