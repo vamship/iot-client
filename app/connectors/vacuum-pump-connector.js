@@ -181,7 +181,7 @@ VacuumPumpConnector.prototype._process = function() {
             this._requestResetHandle = null;
         }.bind(this), this._requestTimeout);
     } else {
-        this._logger.info('Port not initialized and ready');
+        this._logger.warn('Port not initialized and ready');
     }
 };
 

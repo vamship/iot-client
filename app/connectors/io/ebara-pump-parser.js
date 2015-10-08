@@ -18,6 +18,75 @@ var SENSOR_MAP = {
     ';': 'boxTemperature'
 };
 
+var PUMP_SENSORS  = [
+    'Total Running Time',
+    'BP Power',
+    'MP Power',
+    'BP Motor Speed',
+    'MP Motor Speed',
+    'BP Current',
+    'MP Current',
+    'BP Casing Temp',
+    'MP Casing Temp',
+    'Reserved',
+    'Reserved',
+    'Cooling Water Flow',
+    'Pump N2 Flow',
+    'Reserved',
+    'Back Pressure',
+    'Heater 1',
+    'Heater 2',
+    'Heater 3',
+    'Heater 4',
+    'Vacuum Pressure',
+    'Cooler 1',
+    'Cooler 2',
+    'Cooler 3',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Current Time',
+    'Total Running Time',
+    'BP Current',
+    'MP Current',
+    'Casing Temp',
+    'Cooling Water Flow',
+    'Pump N2 Flow',
+    'Dilution N2 Flow',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Reserved',
+    'Cooler 1',
+    'Cooler 2',
+    'Cooler 3',
+    'Exhaust Trap Temp',
+    'Vacuum Pressure',
+    'BP Motor Speed'
+];
+
 /**
  * Represents a parser object that can receive and process data from a vacuum
  * pump
@@ -137,4 +206,4 @@ EbaraPumpParser.prototype.getParser = function() {
     }.bind(this);
 };
 
-module.exports = EbaraPumpParser;
+odule.exports = EbaraPumpParser;
