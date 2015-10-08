@@ -1,7 +1,7 @@
 {
    "connectorTypes": {
-       "Http": "./connectors/http-connector",
-       "VacuumPump": "./connectors/vacuum-pump-connector"
+       "Http": "./http-connector",
+       "VacuumPump": "./vacuum-pump-connector"
    },
 
    "cloudConnectors": {

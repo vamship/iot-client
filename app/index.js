@@ -2,24 +2,28 @@
 'use strict';
 
 var _iotLib = require('iot-client-lib');
+var _args = require('./arg-parser').args;
+var _loggerProvider = require('./logger-provider');
 
-var _config = require('./config');
-var _loggerProvider = require('./logger');
-var _logger = _loggerProvider.getLogger('app');
+var logger = _loggerProvider.getLogger('app');
 
-_logger.info('Ready to go');
+logger.debug('Application ready to launch.');
+logger.debug('Application configuration: ', GLOBAL.config);
+
+logger.debug('Creating controller');
 var controller = new _iotLib.Controller({
-    moduleBasePath: GLOBAL.config.cfg_module_base_path
+    moduleBasePath: GLOBAL.config.cfg_module_base_dir
 }, _loggerProvider);
 
-controller.init('./config.json').then(function() {
-    _logger.info('Configuration successfully loaded');
+logger.info('Initializing connectors');
+controller.init(GLOBAL.config.cfg_node_config_path).then(function() {
+    logger.info('Connectors successfully initialized');
 }, function(err) {
-    _logger.error('Error loading configuration: ', err);
+    logger.error('Error initializing connectors: ', err);
     controller.stop().fin(function(err) {
         if(err) {
-            _logger.error('Error stopping program: %s', err);
+            logger.error('Error stopping program: ', err);
         }
-        _logger.info('Program stopped');
+        logger.info('Program stopped');
     });
 }).done();

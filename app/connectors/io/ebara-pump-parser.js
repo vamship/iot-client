@@ -1,7 +1,7 @@
 /* jshint node:true */
 'use strict';
 
-var _logger = require('../../logger');
+var _loggerProvider = require('../../logger-provider');
 
 var CR = 13;
 var LF = 13;
@@ -27,7 +27,7 @@ var SENSOR_MAP = {
  */
 function EbaraPumpParser(id) {
     this.reset();
-    this._logger = _logger.getLogger(id);
+    this._logger = _loggerProvider.getLogger(id);
 }
 
 /**
