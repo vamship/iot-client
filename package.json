@@ -1,15 +1,15 @@
 {
-  "name": "witchcraft-client",
+  "name": "iotnode",
   "version": "1.0.0",
-  "description": "Reference client implementation for witchcraft (raspberry pi)",
+  "description": "Reference IOT node implementation",
   "main": "app/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "IOT",
-    "raspberry",
-    "pi"
+    "iot",
+    "client",
+    "linux"
   ],
   "author": "Vamshi Ponnapalli <vamshi.ponnapalli@gmail.com>",
   "license": "ISC",
