@@ -26,5 +26,6 @@ controller.init(GLOBAL.config.cfg_node_config_path).then(function() {
             logger.error('Error stopping program: ', err);
         }
         logger.info('Program stopped');
+        process.exit(1);
     });
 }).done();
