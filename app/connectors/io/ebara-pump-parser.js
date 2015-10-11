@@ -206,4 +206,4 @@ EbaraPumpParser.prototype.getParser = function() {
     }.bind(this);
 };
 
-odule.exports = EbaraPumpParser;
+module.exports = EbaraPumpParser;
