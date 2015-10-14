@@ -92,7 +92,6 @@ VacuumPumpConnector.prototype._errorHandler = function(err) {
  */
 VacuumPumpConnector.prototype._start = function() {
     this._logger.info('Initializing connector');
-    this._logger.debug('Connector config: ', this._config);
 
     var def = _q.defer();
     this._port = new SerialPort(this._config.portName, {
