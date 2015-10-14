@@ -4,7 +4,7 @@
 var _loggerProvider = require('../../logger-provider');
 
 var CR = 13;
-var LF = 13;
+var LF = 10;
 var SENSOR_MAP = {
     '0': 'bpMotorCurrent',
     '1': 'mpMotorCurrent',
