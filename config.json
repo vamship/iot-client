@@ -1,14 +1,15 @@
 {
    "connectorTypes": {
        "Http": "./http-connector",
-       "VacuumPump": "./vacuum-pump-connector"
+       "VacuumPump": "./vacuum-pump-connector",
+       "Mqtt": "./mqtt-connector"
    },
 
    "cloudConnectors": {
-       "wc-http": {
+       "http": {
            "type": "Http",
            "config": {
-               "pollFrequency": 10000,
+               "pollFrequency": 100000,
                "url": "https://api-iot.analoggarage.com",
                "headers": {
                    "apiKey": "witchcraft",
@@ -20,17 +21,15 @@
    },
 
    "deviceConnectors": {
-       "wc-vp-1": {
-           "type": "VacuumPump",
+       "buttons": {
+           "type": "Mqtt",
            "config": {
-               "pollFrequency": 5000,
-               "portName": "/dev/tty.usbserial-FTGPJQKL",
-               "baudRate": 9600,
-               "parity": "none",
-               "stopBits": 1,
-               "dataBits": 7,
-               "flowControl": false,
-               "pumpRequestTimeout": 3600000
+               "host": "10.0.0.1",
+               "port": 1883,
+               "networkInterface": "en0",
+               "username": "pi",
+               "password": "Appl3P13!",
+               "topicPrefix": "/things/+/"
            }
        }
    }

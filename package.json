@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-      "iotnode": "app/index.js"
+    "iotnode": "app/index.js"
   },
   "keywords": [
     "iot",
@@ -19,6 +19,7 @@
   "dependencies": {
     "clone": "^1.0.2",
     "iot-client-lib": "git+https://github.com/vamship/iot-client-lib.git",
+    "mqtt": "^1.4.3",
     "node-clone": "^0.1.1",
     "q": "^1.4.1",
     "serialport": "^1.7.4",
