@@ -30,15 +30,19 @@ HttpConnector.prototype._preparePayload = function() {
     
     this._buffer.map(function(item) {
         var data = {
-            mac: mac,
+            mac: mac + '-' + item.id,
             sensors: []
         };
         for(var dataType in item.data) {
             hasData = true;
-            data.sensors.push({
-                name: item.id + '-' + dataType,
-                value: item.data[dataType]
-            });
+            if(dataType === 'timestamp') {
+                data.timestamp = item.data[dataType];
+            } else {
+                data.sensors.push({
+                    name: dataType,
+                    value: item.data[dataType]
+                });
+            }
         }
         return data;
     }).forEach(function(array) {
@@ -63,17 +67,19 @@ HttpConnector.prototype._process = function() {
         return;
     }
 
+    this._logger.info('Sending data to cloud');
+    payload = JSON.stringify(payload);
+
     var request = _unirest.post(this._config.url + '/api/nodes');
     for(var header in this._config.headers) {
         request = request.header(header, this._config.headers[header]);
     }
 
-    this._logger.info('Sending data to cloud');
     this._logger.debug('Payload: ', payload);
-    request.send(JSON.stringify(payload))
+    request.send(payload)
         .end(function(response) {
             if(response.ok) {
-                this._logger.info('Request processed successfully');
+                this._logger.info('Data successfully posted to the cloud');
             } else {
                 //TODO: log message here
                 //Error posting data to server.

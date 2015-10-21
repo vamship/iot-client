@@ -105,7 +105,7 @@ function EbaraPumpParser(id) {
  * @private
  */
 EbaraPumpParser.prototype._populateTimestamp = function(payload, tokens) {
-    var matches = /([0-9]{4,}\/[0-9]{2,}\/[0-9]{2,})\/(.*)/.exec(tokens[0]);
+    var matches = /([0-9]{4,}\/[0-9]{2,}\/[0-9]{2,}).(.*)/.exec(tokens[0]);
     var timestamp = NaN;
 
     if(matches && matches.length && matches.length > 2) {

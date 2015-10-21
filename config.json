@@ -1,36 +1,156 @@
 {
-   "connectorTypes": {
-       "Http": "./http-connector",
-       "VacuumPump": "./vacuum-pump-connector",
-       "Mqtt": "./mqtt-connector"
-   },
+    "connectorTypes": {
+        "Http": "./http-connector",
+        "VacuumPump": "./vacuum-pump-connector",
+        "Mqtt": "./mqtt-connector"
+    },
 
-   "cloudConnectors": {
-       "http": {
-           "type": "Http",
-           "config": {
-               "pollFrequency": 100000,
-               "url": "https://api-iot.analoggarage.com",
-               "headers": {
-                   "apiKey": "witchcraft",
-                   "content-type": "application/json"
-               },
-               "mac": "rasp-test-01"
-           }
-       }
-   },
+    "cloudConnectors": {
+        "http": {
+            "type": "Http",
+            "config": {
+                "pollFrequency": 10000,
+                "url": "https://api-iot.analoggarage.com",
+                "headers": {
+                    "apiKey": "witchcraft",
+                    "content-type": "application/json"
+                },
+                "mac": "pr4pi1"
+            }
+        }
+    },
 
-   "deviceConnectors": {
-       "buttons": {
-           "type": "Mqtt",
-           "config": {
-               "host": "10.0.0.1",
-               "port": 1883,
-               "networkInterface": "en0",
-               "username": "pi",
-               "password": "Appl3P13!",
-               "topicPrefix": "/things/+/"
-           }
-       }
-   }
+    "deviceConnectors": {
+        "vp00": {
+            "type": "VacuumPump",
+            "config": {
+                "pollFrequency": 5000,
+                "portName": "/dev/pump0",
+                "baudRate": 9600,
+                "parity": "none",
+                "stopBits": 1,
+                "dataBits": 7,
+                "flowControl": false,
+                "pumpRequestTimeout": 60000
+            }
+        },
+        "vp01": {
+            "type": "VacuumPump",
+            "config": {
+                "pollFrequency": 5000,
+                "portName": "/dev/pump1",
+                "baudRate": 9600,
+                "parity": "none",
+                "stopBits": 1,
+                "dataBits": 7,
+                "flowControl": false,
+                "pumpRequestTimeout": 60000
+            }
+        },
+        "vp02": {
+            "type": "VacuumPump",
+            "config": {
+                "pollFrequency": 5000,
+                "portName": "/dev/pump2",
+                "baudRate": 9600,
+                "parity": "none",
+                "stopBits": 1,
+                "dataBits": 7,
+                "flowControl": false,
+                "pumpRequestTimeout": 60000
+            }
+        },
+        "vp03": {
+            "type": "VacuumPump",
+            "config": {
+                "pollFrequency": 5000,
+                "portName": "/dev/pump3",
+                "baudRate": 9600,
+                "parity": "none",
+                "stopBits": 1,
+                "dataBits": 7,
+                "flowControl": false,
+                "pumpRequestTimeout": 60000
+            }
+        },
+        "vp04": {
+            "type": "VacuumPump",
+            "config": {
+                "pollFrequency": 5000,
+                "portName": "/dev/pump4",
+                "baudRate": 9600,
+                "parity": "none",
+                "stopBits": 1,
+                "dataBits": 7,
+                "flowControl": false,
+                "pumpRequestTimeout": 60000
+            }
+        },
+        "vp05": {
+            "type": "VacuumPump",
+            "config": {
+                "pollFrequency": 5000,
+                "portName": "/dev/pump5",
+                "baudRate": 9600,
+                "parity": "none",
+                "stopBits": 1,
+                "dataBits": 7,
+                "flowControl": false,
+                "pumpRequestTimeout": 60000
+            }
+        },
+        "vp06": {
+            "type": "VacuumPump",
+            "config": {
+                "pollFrequency": 5000,
+                "portName": "/dev/pump6",
+                "baudRate": 9600,
+                "parity": "none",
+                "stopBits": 1,
+                "dataBits": 7,
+                "flowControl": false,
+                "pumpRequestTimeout": 60000
+            }
+        },
+        "vp07": {
+            "type": "VacuumPump",
+            "config": {
+                "pollFrequency": 5000,
+                "portName": "/dev/pump7",
+                "baudRate": 9600,
+                "parity": "none",
+                "stopBits": 1,
+                "dataBits": 7,
+                "flowControl": false,
+                "pumpRequestTimeout": 60000
+            }
+        },
+        "vp08": {
+            "type": "VacuumPump",
+            "config": {
+                "pollFrequency": 5000,
+                "portName": "/dev/pump8",
+                "baudRate": 9600,
+                "parity": "none",
+                "stopBits": 1,
+                "dataBits": 7,
+                "flowControl": false,
+                "pumpRequestTimeout": 60000
+            }
+        }
+    },
+
+    "deviceConnectors.ignore": {
+        "buttons": {
+            "type": "Mqtt",
+            "config": {
+                "host": "10.0.0.1",
+                "port": 1883,
+                "networkInterface": "en0",
+                "username": "pi",
+                "password": "Appl3P13!",
+                "topicPrefix": "/things/+/"
+            }
+        }
+    }
 }
