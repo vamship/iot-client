@@ -21,7 +21,7 @@
     },
 
     "deviceConnectors": {
-        "vp00": {
+        "pump00": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,
@@ -34,7 +34,7 @@
                 "pumpRequestTimeout": 60000
             }
         },
-        "vp01": {
+        "pump01": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,
@@ -47,7 +47,7 @@
                 "pumpRequestTimeout": 60000
             }
         },
-        "vp02": {
+        "pump02": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,
@@ -60,7 +60,7 @@
                 "pumpRequestTimeout": 60000
             }
         },
-        "vp03": {
+        "pump03": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,
@@ -73,7 +73,7 @@
                 "pumpRequestTimeout": 60000
             }
         },
-        "vp04": {
+        "pump04": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,
@@ -86,7 +86,7 @@
                 "pumpRequestTimeout": 60000
             }
         },
-        "vp05": {
+        "pump05": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,
@@ -99,7 +99,7 @@
                 "pumpRequestTimeout": 60000
             }
         },
-        "vp06": {
+        "pump06": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,
@@ -112,7 +112,7 @@
                 "pumpRequestTimeout": 60000
             }
         },
-        "vp07": {
+        "pump07": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,
@@ -125,7 +125,7 @@
                 "pumpRequestTimeout": 60000
             }
         },
-        "vp08": {
+        "pump08": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,

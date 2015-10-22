@@ -55,37 +55,50 @@ HttpConnector.prototype._preparePayload = function() {
 
 /**
  * @class HttpConnector
- * @method _process
- * @protected
+ * @method _makeRequest
+ * @private
  */
-HttpConnector.prototype._process = function() {
-    var payload = this._preparePayload();
-    if(!payload) {
-        //TODO: Log message here.
-        //No data to send
-        this._logger.info('No data to send');
-        return;
-    }
-
-    this._logger.info('Sending data to cloud');
-    payload = JSON.stringify(payload);
+HttpConnector.prototype._makeRequest = function(payload) {
+    this._logger.info('Sending data to cloud for: [%s]', payload[0].mac);
 
     var request = _unirest.post(this._config.url + '/api/nodes');
     for(var header in this._config.headers) {
         request = request.header(header, this._config.headers[header]);
     }
 
-    this._logger.debug('Payload: ', payload);
-    request.send(payload)
+    var payloadString = JSON.stringify(payload);
+    this._logger.debug('Payload: ', payloadString);
+    request.send(payloadString)
         .end(function(response) {
             if(response.ok) {
-                this._logger.info('Data successfully posted to the cloud');
+                this._logger.info('Data successfully posted to the cloud for: [%s]', payload[0].mac);
             } else {
                 //TODO: log message here
                 //Error posting data to server.
-                this._logger.error('Error posting data to server. Status: [%s]. Body:', response.status, response.body);
+                this._logger.error('Error posting data to server for [%s]. Status: [%s]. Body:',
+                                            payload[0].mac, response.status, response.body);
             }
         }.bind(this));
+};
+
+/**
+ * @class HttpConnector
+ * @method _process
+ * @protected
+ */
+HttpConnector.prototype._process = function() {
+    var payloads = this._preparePayload();
+    if(!payloads) {
+        //TODO: Log message here.
+        //No data to send
+        this._logger.info('No data to send');
+        return;
+    }
+
+    this._logger.info('Sending [%s] packets of data to the cloud', payloads.length);
+    payloads.forEach(function(payload) {
+        this._makeRequest([payload]);
+    }.bind(this));
 };
 
 module.exports = HttpConnector;

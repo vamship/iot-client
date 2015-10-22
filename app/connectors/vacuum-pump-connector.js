@@ -5,7 +5,7 @@ var _util = require('util');
 var _q = require('q');
 var _spi = require('serialport');
 var SerialPort = _spi.SerialPort;
-//var SerialPort = require('../../test/mock-serial-port');
+//SerialPort = require('../../test/mock-serial-port');
 var PollingConnector = require('iot-client-lib').PollingConnector;
 var EbaraPumpParser = require('./io/ebara-pump-parser');
 
