@@ -1,17 +1,16 @@
 /* jshint node:true */
 'use strict';
 
-var _util = require('util');
 var _q = require('q');
-var _spi = require('serialport');
-var SerialPort = _spi.SerialPort;
+var _serialport = require('serialport');
+var SerialPort = _serialport.SerialPort;
 //SerialPort = require('../../test/mock-serial-port');
 var PollingConnector = require('iot-client-lib').PollingConnector;
 var EbaraPumpParser = require('./io/ebara-pump-parser');
 
 /**
- * Connector that interfaces with a vacuum pump over SPI, and
- * extract data intended for the cloud.
+ * Connector that interfaces with a vacuum pump over a serial port (RS232) and
+ * extracts data intended for the cloud.
  *
  * @class VacuumPumpConnector
  * @constructor

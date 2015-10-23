@@ -2,7 +2,8 @@
     "connectorTypes": {
         "Http": "./http-connector",
         "VacuumPump": "./vacuum-pump-connector",
-        "Mqtt": "./mqtt-connector"
+        "Mqtt": "./mqtt-connector",
+        "LeptonCamera": "./lepton-camera-connector"
     },
 
     "cloudConnectors": {
@@ -21,6 +22,18 @@
     },
 
     "deviceConnectors": {
+    },
+
+    "deviceConnectors.ignore": {
+        "camera00": {
+            "type": "LeptonCamera",
+            "config": {
+                "spiDevice": "/dev/spidev0.1",
+                "i2cDevice": "/dev/i2c-1",
+                "maxRetries": 600
+            }
+        },
+
         "pump00": {
             "type": "VacuumPump",
             "config": {
@@ -34,113 +47,7 @@
                 "pumpRequestTimeout": 60000
             }
         },
-        "pump01": {
-            "type": "VacuumPump",
-            "config": {
-                "pollFrequency": 5000,
-                "portName": "/dev/pump1",
-                "baudRate": 9600,
-                "parity": "none",
-                "stopBits": 1,
-                "dataBits": 7,
-                "flowControl": false,
-                "pumpRequestTimeout": 60000
-            }
-        },
-        "pump02": {
-            "type": "VacuumPump",
-            "config": {
-                "pollFrequency": 5000,
-                "portName": "/dev/pump2",
-                "baudRate": 9600,
-                "parity": "none",
-                "stopBits": 1,
-                "dataBits": 7,
-                "flowControl": false,
-                "pumpRequestTimeout": 60000
-            }
-        },
-        "pump03": {
-            "type": "VacuumPump",
-            "config": {
-                "pollFrequency": 5000,
-                "portName": "/dev/pump3",
-                "baudRate": 9600,
-                "parity": "none",
-                "stopBits": 1,
-                "dataBits": 7,
-                "flowControl": false,
-                "pumpRequestTimeout": 60000
-            }
-        },
-        "pump04": {
-            "type": "VacuumPump",
-            "config": {
-                "pollFrequency": 5000,
-                "portName": "/dev/pump4",
-                "baudRate": 9600,
-                "parity": "none",
-                "stopBits": 1,
-                "dataBits": 7,
-                "flowControl": false,
-                "pumpRequestTimeout": 60000
-            }
-        },
-        "pump05": {
-            "type": "VacuumPump",
-            "config": {
-                "pollFrequency": 5000,
-                "portName": "/dev/pump5",
-                "baudRate": 9600,
-                "parity": "none",
-                "stopBits": 1,
-                "dataBits": 7,
-                "flowControl": false,
-                "pumpRequestTimeout": 60000
-            }
-        },
-        "pump06": {
-            "type": "VacuumPump",
-            "config": {
-                "pollFrequency": 5000,
-                "portName": "/dev/pump6",
-                "baudRate": 9600,
-                "parity": "none",
-                "stopBits": 1,
-                "dataBits": 7,
-                "flowControl": false,
-                "pumpRequestTimeout": 60000
-            }
-        },
-        "pump07": {
-            "type": "VacuumPump",
-            "config": {
-                "pollFrequency": 5000,
-                "portName": "/dev/pump7",
-                "baudRate": 9600,
-                "parity": "none",
-                "stopBits": 1,
-                "dataBits": 7,
-                "flowControl": false,
-                "pumpRequestTimeout": 60000
-            }
-        },
-        "pump08": {
-            "type": "VacuumPump",
-            "config": {
-                "pollFrequency": 5000,
-                "portName": "/dev/pump8",
-                "baudRate": 9600,
-                "parity": "none",
-                "stopBits": 1,
-                "dataBits": 7,
-                "flowControl": false,
-                "pumpRequestTimeout": 60000
-            }
-        }
-    },
 
-    "deviceConnectors.ignore": {
         "buttons": {
             "type": "Mqtt",
             "config": {
