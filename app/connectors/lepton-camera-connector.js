@@ -53,7 +53,7 @@ LeptonCameraConnector.prototype._start = function() {
     }
 
     try {
-        this._stop.fin(function() {
+        this._stop().fin(function() {
             // NOTE: This is a synchronous (blocking) call.
             this._camera = new _spi.Spi(this._config.spiDevice, {
                 mode: _spi.MODE.MODE_3,
