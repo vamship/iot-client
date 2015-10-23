@@ -22,6 +22,14 @@
     },
 
     "deviceConnectors": {
+        "camera00": {
+            "type": "LeptonCamera",
+            "config": {
+                "spiDevice": "/dev/spidev0.1",
+                "i2cDevice": "/dev/i2c-1",
+                "maxRetries": 600
+            }
+        }
     },
 
     "deviceConnectors.ignore": {

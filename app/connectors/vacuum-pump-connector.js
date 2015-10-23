@@ -1,6 +1,7 @@
 /* jshint node:true */
 'use strict';
 
+var _util = require('util');
 var _q = require('q');
 var _serialport = require('serialport');
 var SerialPort = _serialport.SerialPort;
