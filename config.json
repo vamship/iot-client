@@ -25,6 +25,7 @@
         "camera00": {
             "type": "LeptonCamera",
             "config": {
+                "pollFrequency": 5000,
                 "spiDevice": "/dev/spidev0.1",
                 "i2cDevice": "/dev/i2c-1",
                 "maxRetries": 600
@@ -36,6 +37,7 @@
         "camera00": {
             "type": "LeptonCamera",
             "config": {
+                "pollFrequency": 5000,
                 "spiDevice": "/dev/spidev0.1",
                 "i2cDevice": "/dev/i2c-1",
                 "maxRetries": 600

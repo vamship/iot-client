@@ -55,6 +55,7 @@ LeptonCameraConnector.prototype._start = function() {
     try {
         this._stop().fin(function() {
             // NOTE: This is a synchronous (blocking) call.
+            this._logger.info('Initializing SPI: [%s]', this._config.spiDevice);
             this._camera = new _spi.Spi(this._config.spiDevice, {
                 mode: _spi.MODE.MODE_3,
                 size: 8,
@@ -64,8 +65,10 @@ LeptonCameraConnector.prototype._start = function() {
 
                 device.open();
                 this._logger.info('Successfully connected to camera');
+
+                def.resolve();
             }.bind(this));
-        });
+        }.bind(this));
     } catch(ex) {
         this._logger.error('Unable to connect to camera: [%s]', ex.toString(), ex);
         def.reject(ex);
@@ -102,7 +105,7 @@ LeptonCameraConnector.prototype._stop = function() {
 
     // Allow the super class to do its thing after we are done
     // initializing the port.
-    return def.promise.fin(LeptonCameraConnector.super_.prototype._stop.bind(this));
+    return def.promise.then(LeptonCameraConnector.super_.prototype._stop.bind(this));
 };
 
 /**
