@@ -137,20 +137,21 @@ LeptonCameraConnector.prototype._process = function() {
             //txBuf[3] = 0x40;
 
             var rxBuf = new Buffer(PACKET_SIZE);
-            camera.transfer(txBuf, rxBuf, function(dev, data) {
+            this._camera.transfer(txBuf, rxBuf, function(dev, data) {
                 if(data[1] < 60) {
                     var packetNumber = data[1];
-                    if(packets.length - 1 != packetNumber) {
+                    if(packets.length != packetNumber) {
+                        this._logger.warn('Missed packet: [%s] [%s]', packets.length, packetNumber);
                         retriesRemaining--;
                         packets = [];
 
-                        this._logger.warn('Missed packet: [%s] [%s]', packets.length - 1, packetNumber);
                         if(retriesRemaining <= 0) {
                             this._logger.error('Max retries exceeded. Aborting');
                             abort = true;
                         }
                     } else {
                         var packet = data.slice(4);
+                        var rowValues = [];
 
                         for(var index=0; index<packet.length; index+=2) {
                             var value = packet.readUInt16BE(index);
@@ -164,18 +165,20 @@ LeptonCameraConnector.prototype._process = function() {
                             if(packet.length > metadata.cols) {
                                 metadata.cols = packet.length;
                             }
+
+                            rowValues.push(value);
                         }
 
-                        packets.push(packet.toString('base64'));
+                        packets.push(rowValues);
                     }
                 }
-            });
-        } while(counter < 60 && !abort);
+            }.bind(this));
+        } while(packets.length < 60 && !abort);
 
         if(!abort) {
             // Two bytes per column value.
             metadata.cols = metadata.cols/2;
-            metadata.rows = counter;
+            metadata.rows = packets.length;
             metadata.delta = metadata.maxValue - metadata.minValue;
 
             var payload = {
@@ -185,7 +188,7 @@ LeptonCameraConnector.prototype._process = function() {
 
             this._logger.info('Emitting sensor data for node');
             this._logger.debug('Sensor data: ', payload);
-            this.emit('data', packets);
+            this.emit('data', payload);
         } else {
             this._logger.warn('Error reading frame from camera. No data to send');
         }
