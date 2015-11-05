@@ -10,7 +10,7 @@ function _buildTransports(label) {
     //Optionally add the console transport
     if(!GLOBAL.config.cfg_no_log_console) {
         transports.push(new _winston.transports.Console({
-            level: 'silly',
+            level: GLOBAL.config.cfg_log_level,
             colorize: true,
             prettyPrint: true,
             stringify: true,
@@ -21,7 +21,7 @@ function _buildTransports(label) {
     //Optionally add the file transport
     if(!GLOBAL.config.cfg_no_log_file) {
         transports.push(new _winston.transports.DailyRotateFile({
-            level: 'debug',
+            level: GLOBAL.config.cfg_log_level,
             filename: _path.join(GLOBAL.config.cfg_logs_dir, 'app'),
             datePattern: '.yyyy-MM-dd.log',
             label: label

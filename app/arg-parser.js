@@ -26,6 +26,12 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                                     'files will be written. This directory must exist, ' +
                                     'and must be writable by the user running the program.\r\n',
                     })
+                    .option('log-level', {
+                        demand: false,
+                        default: 'info',
+                        type: 'string',
+                        describe: 'Specifies the log level of the logger. \r\n  '
+                    })
                     .option('no-log-console', {
                         demand: false,
                         default: false,
@@ -61,6 +67,7 @@ GLOBAL.config.cfg_no_log_console = args.noLogConsole;
 GLOBAL.config.cfg_no_log_file = args.noLogFile;
 GLOBAL.config.cfg_node_config_path = args.nodeConfig;
 GLOBAL.config.cfg_logs_dir = args.logDir;
+GLOBAL.config.cfg_log_level = args.logLevel;
 GLOBAL.config.cfg_module_base_dir = args.connectorDir;
 
 //NOTE: Logger must be initialized *after* global configuration has been set.
