@@ -16,7 +16,7 @@
                     "apiKey": "witchcraft",
                     "content-type": "application/json"
                 },
-                "mac": "pr4pi1"
+                "gatewayId": "pr4pi1"
             }
         }
     },

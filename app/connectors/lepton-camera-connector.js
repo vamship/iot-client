@@ -182,8 +182,14 @@ LeptonCameraConnector.prototype._process = function() {
             metadata.delta = metadata.maxValue - metadata.minValue;
 
             var payload = {
-                metadata: metadata,
-                lines: packets
+                id: this._id,
+                data: {
+                    timestamp: Date.now(),
+                    camera: {
+                        metadata: metadata,
+                        lines: packets
+                    }
+                }
             };
 
             this._logger.info('Emitting sensor data for node');

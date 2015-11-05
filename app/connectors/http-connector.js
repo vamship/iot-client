@@ -24,33 +24,33 @@ _util.inherits(HttpConnector, PollingConnector);
  * @private
  */
 HttpConnector.prototype._preparePayload = function() {
-    var payload = [];
-    var mac = this._config.mac;
-    var hasData = false;
-    
-    this._buffer.map(function(item) {
-        var data = {
-            mac: mac + '-' + item.id,
-            sensors: []
-        };
-        for(var dataType in item.data) {
-            hasData = true;
-            if(dataType === 'timestamp') {
-                data.timestamp = item.data[dataType];
-            } else {
-                data.sensors.push({
-                    name: dataType,
-                    value: item.data[dataType]
+    var gatewayId = this._config.gatewayId;
+    var payload = {};
+
+    this._buffer.forEach(function(item) {
+        var nodeName = gatewayId + '-' + item.id;
+        var nodeData = payload[nodeName];
+        if(!nodeData) {
+            nodeData = {
+                sensors: []
+            };
+            payload[nodeName] = nodeData;
+        }
+
+        var timestamp = item.data['timestamp'];
+        for(var sensorName in item.data) {
+            if(sensorName !== 'timestamp') {
+                nodeData.sensors.push({
+                    sensorName: sensorName,
+                    timestamp: timestamp,
+                    value: item.data[sensorName]
                 });
             }
         }
-        return data;
-    }).forEach(function(array) {
-        payload.push(array);
     });
     this._buffer.splice(0);
 
-    return hasData? payload:null;
+    return payload;
 };
 
 /**
@@ -58,10 +58,11 @@ HttpConnector.prototype._preparePayload = function() {
  * @method _makeRequest
  * @private
  */
-HttpConnector.prototype._makeRequest = function(payload) {
-    this._logger.info('Sending data to cloud for: [%s]', payload[0].mac);
+HttpConnector.prototype._makeRequest = function(nodeName, payload) {
+    this._logger.info('Sending data to cloud for: [%s]', nodeName);
 
-    var request = _unirest.post(this._config.url + '/api/nodes');
+    var url = this._config.url + '/api/nodes/' + nodeName;
+    var request = _unirest.post(url);
     for(var header in this._config.headers) {
         request = request.header(header, this._config.headers[header]);
     }
@@ -71,12 +72,12 @@ HttpConnector.prototype._makeRequest = function(payload) {
     request.send(payloadString)
         .end(function(response) {
             if(response.ok) {
-                this._logger.info('Data successfully posted to the cloud for: [%s]', payload[0].mac);
+                this._logger.info('Data successfully posted to the cloud for: [%s]', nodeName);
             } else {
                 //TODO: log message here
                 //Error posting data to server.
                 this._logger.error('Error posting data to server for [%s]. Status: [%s]. Body:',
-                                            payload[0].mac, response.status, response.body);
+                                            nodeName, response.status, response.body);
             }
         }.bind(this));
 };
@@ -87,17 +88,16 @@ HttpConnector.prototype._makeRequest = function(payload) {
  * @protected
  */
 HttpConnector.prototype._process = function() {
-    var payloads = this._preparePayload();
-    if(!payloads) {
-        //TODO: Log message here.
-        //No data to send
+    var payload = this._preparePayload();
+    var nodeNames = Object.keys(payload);
+    if(nodeNames.length <= 0) {
         this._logger.info('No data to send');
         return;
     }
 
-    this._logger.info('Sending [%s] packets of data to the cloud', payloads.length);
-    payloads.forEach(function(payload) {
-        this._makeRequest([payload]);
+    this._logger.info('Sending [%s] packets of data to the cloud', nodeNames.length);
+    nodeNames.forEach(function(nodeName) {
+        this._makeRequest(nodeName, payload[nodeName]);
     }.bind(this));
 };
 

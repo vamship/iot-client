@@ -104,6 +104,7 @@ MqttConnector.prototype._initClient = function() {
         this.emit('data', {
             id: id,
             data: {
+                timestamp: Date.now(),
                 state: message.toString()
             }
         });
