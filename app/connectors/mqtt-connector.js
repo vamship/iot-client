@@ -96,18 +96,26 @@ MqttConnector.prototype._initClient = function() {
     this._client.on('message', function(topic, message) {
         var tokens = topic.split('/');
         this._logger.info('Message received: [%s:%s]', topic, message.toString());
-        if(tokens.length < 1) {
+        if(tokens.length < 2) {
             this._logger.warn('Message topic did not have sufficient tokens: [%s]', topic);
             return;
         }
-        var id = tokens[tokens.length - 1];
+        var thingName = tokens[tokens.length - 2];
+        var sensorName = tokens[tokens.length - 1];
+
+        if(thingName.length <= 0 || sensorName.length <= 0) {
+            this._logger.warn('Message topic did not have a valid thing name or sensor name: [%s]', topic);
+            return;
+        }
+
+        var data = {
+            timestamp: Date.now()
+        };
+        data[sensorName] = this._parsePayload(message)
         
         this.emit('data', {
-            id: id,
-            data: {
-                timestamp: Date.now(),
-                state: this._parsePayload(message)
-            }
+            id: thingName,
+            data: data
         });
     }.bind(this));
 };
