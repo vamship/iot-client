@@ -36,4 +36,4 @@ ButtonMqttConnector.prototype._parsePayload = function(message) {
     return payload;
 };
 
-module.exports = MqttConnector;
+module.exports = ButtonMqttConnector;
