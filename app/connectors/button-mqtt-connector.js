@@ -2,11 +2,7 @@
 'use strict';
 
 var _util = require('util');
-var _net = require('net');
-var _q = require('q');
-var _mqtt = require('mqtt');
-var Connector = require('iot-client-lib').Connector;
-var _networkUtils = require('../utils/network');
+var MqttConnector = require('./mqtt-connector');
 
 /**
  * Connector that uses MQTT to communicate with sensors connected to a
