@@ -101,14 +101,39 @@ MqttConnector.prototype._initClient = function() {
             return;
         }
         var id = tokens[tokens.length - 1];
+        
         this.emit('data', {
             id: id,
             data: {
                 timestamp: Date.now(),
-                state: message.toString()
+                state: this._parsePayload(message)
             }
         });
     }.bind(this));
+};
+
+/**
+ * @class MqttConnector
+ * @method _parsePayload
+ * @private
+ */
+MqttConnector.prototype._parsePayload = function(message) {
+    if(typeof message === 'undefined' || message === null) {
+        message = '';
+    }
+    message = message.toString();
+    var tokens = message.split('\n');
+    var payload = {};
+    tokens.forEach(function(token) {
+        var pair = token.split('=');
+        var key  = pair[0];
+        key = (key.length <= 0)? '__NO_KEY':key;
+
+        var value = (pair.length > 1) ? pair[1]:key;
+        payload[key] = value;
+    });
+
+    return payload;
 };
 
 /**
