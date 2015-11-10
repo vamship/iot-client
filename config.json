@@ -3,6 +3,7 @@
         "Http": "./http-connector",
         "VacuumPump": "./vacuum-pump-connector",
         "Mqtt": "./mqtt-connector",
+        "ButtonMqtt": "./button-mqtt-connector",
         "LeptonCamera": "./lepton-camera-connector"
     },
 
@@ -58,7 +59,7 @@
         },
 
         "buttons": {
-            "type": "Mqtt",
+            "type": "ButtonMqtt",
             "config": {
                 "host": "10.0.0.1",
                 "port": 1883,
