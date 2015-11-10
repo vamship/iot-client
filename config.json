@@ -15,14 +15,13 @@
                 "headers": {
                     "apiKey": "witchcraft",
                     "content-type": "application/json"
-                },
-                "gatewayId": "pr4pi1"
+                }
             }
         }
     },
 
     "deviceConnectors": {
-        "camera00": {
+        "bb1pi1-camera0": {
             "type": "LeptonCamera",
             "config": {
                 "pollFrequency": 5000,
@@ -34,7 +33,7 @@
     },
 
     "deviceConnectors.ignore": {
-        "camera00": {
+        "bb1pi1-camera0": {
             "type": "LeptonCamera",
             "config": {
                 "pollFrequency": 5000,
@@ -44,7 +43,7 @@
             }
         },
 
-        "pump00": {
+        "pr4pi1-pump0": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,

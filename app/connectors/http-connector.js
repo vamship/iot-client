@@ -24,11 +24,10 @@ _util.inherits(HttpConnector, PollingConnector);
  * @private
  */
 HttpConnector.prototype._preparePayload = function() {
-    var gatewayId = this._config.gatewayId;
     var payload = {};
 
     this._buffer.forEach(function(item) {
-        var nodeName = gatewayId + '-' + item.id;
+        var nodeName = item.id;
         var nodeData = payload[nodeName];
         if(!nodeData) {
             nodeData = {
