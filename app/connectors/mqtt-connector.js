@@ -55,12 +55,37 @@ MqttConnector.prototype._validate = function() {
         return 'Connector configuration does not define a valid mqtt password';
     }
     
-    if (typeof this._config.topicPrefix !== 'string' ||
-               this._config.topicPrefix.length <= 0) {
-        return 'Connector configuration does not define a valid mqtt topicPrefix';
+    if (typeof this._config.topics !== 'string' ||
+               this._config.topics.length <= 0) {
+        return 'Connector configuration does not define a valid mqtt topics';
     }
 
     return '';
+};
+
+/**
+ * @class MqttConnector
+ * @method _setupSubscriptions
+ * @private
+ */
+MqttConnector.prototype._setupSubscriptions = function() {
+    var topics = this._config.topics.split(';');
+    topics.forEach(function(topic) {
+        this._client.subscribe(topic);
+        this._logger.info('Subscribed to topic: [%s]', topic);
+    }.bind(this));
+};
+
+
+/**
+ * @class MqttConnector
+ * @method _processBrokerMessage
+ * @private
+ */
+MqttConnector.prototype._processBrokerMessage = function(topic, message) {
+    //Do nothing - let inheriting classes override functionality
+    //as necessary.
+    this._logger.warn('_processBrokerMessage() not implemented');
 };
 
 /**
@@ -88,60 +113,14 @@ MqttConnector.prototype._initClient = function() {
     this._client.on('connect', function() {
         this._logger.info('Connected to mqtt broker at: [mqtt://%s:%s]',
                                             this._config.host, this._config.port);
-        var topic = this._config.topicPrefix + '+';
-        this._client.subscribe(topic);
-        this._logger.info('Subscribed to topic: [%s]', topic);
+        this._setupSubscriptions();
     }.bind(this));
 
     this._client.on('message', function(topic, message) {
-        var tokens = topic.split('/');
         this._logger.info('Message received: [%s:%s]', topic, message.toString());
-        if(tokens.length < 2) {
-            this._logger.warn('Message topic did not have sufficient tokens: [%s]', topic);
-            return;
-        }
-        var thingName = tokens[tokens.length - 2];
-        var sensorName = tokens[tokens.length - 1];
+        this._processBrokerMessage(topic, message);
 
-        if(thingName.length <= 0 || sensorName.length <= 0) {
-            this._logger.warn('Message topic did not have a valid thing name or sensor name: [%s]', topic);
-            return;
-        }
-
-        var data = {
-            timestamp: Date.now()
-        };
-        data[sensorName] = this._parsePayload(message)
-        
-        this.emit('data', {
-            id: thingName,
-            data: data
-        });
     }.bind(this));
-};
-
-/**
- * @class MqttConnector
- * @method _parsePayload
- * @private
- */
-MqttConnector.prototype._parsePayload = function(message) {
-    if(typeof message === 'undefined' || message === null) {
-        message = '';
-    }
-    message = message.toString();
-    var tokens = message.split('\n');
-    var payload = {};
-    tokens.forEach(function(token) {
-        var pair = token.split('=');
-        var key  = pair[0];
-        key = (key.length <= 0)? '__NO_KEY':key;
-
-        var value = (pair.length > 1) ? pair[1]:key;
-        payload[key] = value;
-    });
-
-    return payload;
 };
 
 /**

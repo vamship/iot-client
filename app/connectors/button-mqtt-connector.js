@@ -20,20 +20,41 @@ _util.inherits(ButtonMqttConnector, MqttConnector);
 
 
 /**
- * @class ButtonMqttConnector
- * @method _parsePayload
+ * @class MqttConnector
+ * @method _processBrokerMessage
  * @private
  */
-ButtonMqttConnector.prototype._parsePayload = function(message) {
-    if(typeof message === 'undefined' || message === null) {
-        return 0;
+MqttConnector.prototype._processBrokerMessage = function(topic, message) {
+    if(typeof topic !== 'string' || topic.length <= 0) {
+        this._logger.warn('Invalid topic specified: [%s]', topic);
     }
+
+    var tokens = topic.split('/');
+    if(tokens.length < 2) {
+        this._logger.warn('Message topic did not have sufficient tokens: [%s]', topic);
+        return;
+    }
+    var thingName = tokens[tokens.length - 2];
+    var sensorName = tokens[tokens.length - 1];
+
+    if(thingName.length <= 0 || sensorName.length <= 0) {
+        this._logger.warn('Message topic did not have a valid thing name or sensor name: [%s]', topic);
+        return;
+    }
+
+    var data = {
+        timestamp: Date.now()
+    };
     var payload = parseInt(message);
     if(isNaN(payload)) {
         payload = -1;
     }
+    data[sensorName] = payload;
 
-    return payload;
+    this.emit('data', {
+        id: thingName,
+        data: data
+    });
 };
 
 module.exports = ButtonMqttConnector;

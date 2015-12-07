@@ -22,19 +22,23 @@
     },
 
     "deviceConnectors": {
-        "bb1pi1-camera0": {
-            "type": "LeptonCamera",
+        "vacuum-pump0": {
+            "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,
-                "spiDevice": "/dev/spidev0.1",
-                "i2cDevice": "/dev/i2c-1",
-                "maxRetries": 600
+                "portName": "/dev/pump0",
+                "baudRate": 9600,
+                "parity": "none",
+                "stopBits": 1,
+                "dataBits": 7,
+                "flowControl": false,
+                "pumpRequestTimeout": 60000
             }
         }
     },
 
     "deviceConnectors.ignore": {
-        "bb1pi1-camera0": {
+        "lepton-camera0": {
             "type": "LeptonCamera",
             "config": {
                 "pollFrequency": 5000,
@@ -44,7 +48,7 @@
             }
         },
 
-        "pr4pi1-pump0": {
+        "vacuum-pump0": {
             "type": "VacuumPump",
             "config": {
                 "pollFrequency": 5000,
@@ -58,7 +62,7 @@
             }
         },
 
-        "buttons": {
+        "buttons-hub0": {
             "type": "ButtonMqtt",
             "config": {
                 "host": "10.0.0.1",
@@ -66,7 +70,7 @@
                 "networkInterface": "en0",
                 "username": "pi",
                 "password": "Appl3P13!",
-                "topicPrefix": "/things/+/"
+                "topics": "/things/+/+"
             }
         }
     }
