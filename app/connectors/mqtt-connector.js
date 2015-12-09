@@ -116,6 +116,11 @@ MqttConnector.prototype._initClient = function() {
         this._setupSubscriptions();
     }.bind(this));
 
+    this._client.on('close', function() {
+        this._logger.info('Closed connection to mqtt broker at: [mqtt://%s:%s]',
+                                            this._config.host, this._config.port);
+    }.bind(this));
+
     this._client.on('message', function(topic, message) {
         this._logger.info('Message received: [%s:%s]', topic, message.toString());
         this._processBrokerMessage(topic, message);
@@ -160,7 +165,7 @@ MqttConnector.prototype._stop = function() {
             this._logger.info('Client stopped [%s]', err);
             def.resolve();
             this._client = null;
-        });
+        }.bind(this));
     } else {
         this._logger.info('MQTT client is not running');
         def.resolve();

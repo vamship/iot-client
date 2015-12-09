@@ -20,11 +20,11 @@ _util.inherits(ButtonMqttConnector, MqttConnector);
 
 
 /**
- * @class MqttConnector
+ * @class ButtonMqttConnector
  * @method _processBrokerMessage
  * @private
  */
-MqttConnector.prototype._processBrokerMessage = function(topic, message) {
+ButtonMqttConnector.prototype._processBrokerMessage = function(topic, message) {
     if(typeof topic !== 'string' || topic.length <= 0) {
         this._logger.warn('Invalid topic specified: [%s]', topic);
     }

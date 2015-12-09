@@ -6,17 +6,27 @@ var _yargs = require('yargs');
 
 var logsDir = _path.resolve(_path.join(__dirname, '../log'));
 var connectorsDir = _path.resolve(_path.join(__dirname, './connectors'));
-var nodeConfigPath = _path.resolve(_path.join(__dirname, '../config.json'));
+
+var configFilePath = _path.resolve(_path.join(__dirname, '../config.json'));
+var watchDir = _path.resolve(_path.join(__dirname, '../watch'));
 
 var args = _yargs.usage('Usage: $0 [OPTIONS]')
-                    .option('node-config', {
+                    .option('config-file', {
                         demand: false,
-                        default: nodeConfigPath,
+                        default: configFilePath,
                         type: 'string',
                         describe: 'Path to the node configuration file. ' +
                                     'Node configuration must be specified as JSON, ' +
                                     'and the configuration file be writable by the ' +
                                     'user running the program.\r\n'
+                    })
+                    .option('watch-dir', {
+                        demand: false,
+                        default: watchDir,
+                        type: 'string',
+                        describe: 'Path to the directory that will be watched for changes.' +
+                                    'Any changes will trigger an automatic program restart.' +
+                                    '\r\n'
                     })
                     .option('log-dir', {
                         demand: false,
@@ -65,8 +75,9 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
 GLOBAL.config = {};
 GLOBAL.config.cfg_no_log_console = args.noLogConsole;
 GLOBAL.config.cfg_no_log_file = args.noLogFile;
-GLOBAL.config.cfg_node_config_path = args.nodeConfig;
+GLOBAL.config.cfg_config_file = args.configFile;
 GLOBAL.config.cfg_logs_dir = args.logDir;
+GLOBAL.config.cfg_watch_dir = args.watchDir;
 GLOBAL.config.cfg_log_level = args.logLevel;
 GLOBAL.config.cfg_module_base_dir = args.connectorDir;
 
