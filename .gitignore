@@ -17,3 +17,6 @@ node_modules
 
 # Temporary files.
 .tmp/
+
+# Watch files
+watch
