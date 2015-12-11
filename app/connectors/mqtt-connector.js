@@ -76,6 +76,28 @@ MqttConnector.prototype._setupSubscriptions = function() {
     }.bind(this));
 };
 
+/**
+ * @class MqttConnector
+ * @method _publish
+ * @private
+ */
+MqttConnector.prototype._publish = function(topic, message, qos) {
+    if(typeof topic !== 'string' || topic.length <= 0) {
+        this._logger.error('Invalid topic specified. Message will not be published [%s::%s]', topic, message);
+        return;
+    }
+    if(typeof message !== 'string' || message.length <= 0) {
+        this._logger.error('Invalid message specified. Message will not be published [%s::%s]', topic, message);
+        return;
+    }
+    if(typeof qos !== 'number' || qos > 2 || qos < 0) {
+        qos = 1;
+    }
+    if(this._client) {
+        this._client.publish(topic, message, {qos: qos});
+    }
+};
+
 
 /**
  * @class MqttConnector
@@ -87,6 +109,7 @@ MqttConnector.prototype._processBrokerMessage = function(topic, message) {
     //as necessary.
     this._logger.warn('_processBrokerMessage() not implemented');
 };
+
 
 /**
  * @class MqttConnector

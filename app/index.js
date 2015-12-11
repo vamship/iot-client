@@ -74,6 +74,10 @@ function launchController() {
     });
 };
 
+process.on('exit', function() {
+    _cncHelper.touchRestartFile();
+});
+
 _cncHelper.readLastCncAction()
     .then(null, handleCncReadError)
     .then(logLastCncAction)

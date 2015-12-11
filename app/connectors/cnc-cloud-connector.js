@@ -18,6 +18,16 @@ function CncCloudConnector(id) {
 
 _util.inherits(CncCloudConnector, MqttConnector);
 
+/**
+ * @class CncCloudConnector
+ * @method _start
+ * @protected
+ */
+CncCloudConnector.prototype._start = function() {
+    this._topicPrefix = ['', this._config.username, this._config.gatewayname, '' ].join('/');
+    this._config.topics = 'cloud' + this._topicPrefix + '+';
+    return CncCloudConnector.super_.prototype._start.call(this);
+}
 
 /**
  * @class CncCloudConnector
@@ -30,7 +40,7 @@ CncCloudConnector.prototype._processBrokerMessage = function(topic, message) {
     }
 
     var tokens = topic.split('/');
-    if(tokens.length < 3) {
+    if(tokens.length < 4) {
         this._logger.warn('Message topic did not have sufficient tokens: [%s]', topic);
         return;
     }
@@ -38,18 +48,46 @@ CncCloudConnector.prototype._processBrokerMessage = function(topic, message) {
     var requestId = tokens[3];
 
     this._logger.info('Command received from cloud [%s]. RequestId: [%s]', topic, requestId);
-    var payload = null;
+
+    var commands = [];
     try {
-        payload = JSON.parse(message.toString());
-        payload.command = payload.command || {};
-        payload.command.requestId = requestId;
+        var cloudCommands = JSON.parse(message.toString());
+        if(!(cloudCommands instanceof Array)) {
+            cloudCommands = [ cloudCommands ];
+        }
+
+        cloudCommands.forEach(function(command) {
+            if(command && typeof command === 'object') {
+                command.requestId = requestId;
+                commands.push(command);
+            } else {
+                this._logger.warn('Bad command received from cloud. Command will be ignored', command);
+            }
+        });
     } catch (ex) {
         this._logger.error('Invalid message received: [%s] [%s]. RequestId: [%s]. Error: [%s]', topic, message, requestId, ex.toString());
-        this.emit('log', [ 'Invalid message received: [%s] [%s]. RequestId: [%s]. Error: [%s]', topic, message, requestId, ex.toString() ]);
         return;
     }
 
-    this.emit('data', [ payload.command ]);
+
+    this.emit('data', commands);
+};
+
+/**
+ * @class CncCloudConnector
+ * @method addLogData
+ * @param {Object} data The data to add to the connector's log buffer.
+ */
+CncCloudConnector.prototype.addLogData = function(data) {
+    if(!data || (data instanceof Array) || typeof data !== 'object') {
+        this._logger.warn('Log message was not presented in a valid format, and will be ignored', data);
+        return;
+    }
+    var requestId = data.requestId || 'na';
+    var message = data.message || '';
+    var qos = 0;
+    var topic = 'gateway' + this._topicPrefix + requestId;
+    this._publish(topic, message, qos);
 };
 
 module.exports = CncCloudConnector;

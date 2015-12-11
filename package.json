@@ -24,8 +24,13 @@
     "q": "^1.4.1",
     "serialport": "^1.7.4",
     "spi": "^0.2.0",
+    "touch": "^1.0.0",
     "unirest": "^0.4.2",
     "winston": "^1.0.1",
     "yargs": "^3.27.0"
+  },
+  "devDependencies": {
+    "colors": "^1.1.2",
+    "prompt": "^0.2.14"
   }
 }

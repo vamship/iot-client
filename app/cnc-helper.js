@@ -5,6 +5,7 @@ var _fs = require('fs');
 var _path = require('path');
 var _q = require('q');
 var _childProcess = require('child_process');
+var _touch = require('touch');
 
 var _loggerProvider = require('./logger-provider');
 var logger = _loggerProvider.getLogger('app');
@@ -75,7 +76,6 @@ module.exports = {
         return def.promise;
     },
 
-
     /**
      * Runs a command that will upgrade the current package.
      *
@@ -108,5 +108,16 @@ module.exports = {
         });
 
         return def.promise;
+    },
+
+    /**
+     * Touches a file that is watched by an externall process, triggering restart.
+     * This is a synchronous operation that will block until completed.
+     *
+     * @module cncHelper
+     * @method touchRestartFile
+     */
+    touchRestartFile: function() {
+        _touch.sync(_cncFilePath, { force: true });
     }
 };
