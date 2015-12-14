@@ -193,7 +193,10 @@ MqttConnector.prototype._stop = function() {
     if (this._client) {
         this._logger.info('Stopping connector');
         this._client.end(function(err){
-            this._logger.info('Client stopped [%s]', err);
+            if(err) {
+                this._logger.error('Error stopping client: [%s]', err);
+            }
+            this._logger.info('Client stopped [%s]', this._id);
             def.resolve();
             this._client = null;
         }.bind(this));
