@@ -88,7 +88,7 @@ module.exports = {
     upgradeProgram: function(requestId) {
         var def = _q.defer();
 
-        var args = [ 'update', '-g', 'iot-client' ];
+        var args = [ 'update', '-g', '--unsafe-perm', 'iot-client' ];
 
         logger.debug('Upgrading iot client program. RequestId: [%s]', requestId);
         var upgradeProcess = _childProcess.spawn('npm', args);
