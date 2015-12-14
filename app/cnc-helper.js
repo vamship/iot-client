@@ -93,6 +93,14 @@ module.exports = {
         logger.debug('Upgrading iot client program. RequestId: [%s]', requestId);
         var upgradeProcess = _childProcess.spawn('npm', args);
 
+        upgradeProcess.stdout.on('data', function(data) {
+            logger.info('[%s]', data.toString());
+        });
+
+        upgradeProcess.stderr.on('data', function(data) {
+            logger.error('[%s]', data.toString());
+        });
+
         upgradeProcess.on('error', function(error) {
             logger.error('Error running upgrade process: [%s]. RequestId: [%s]', error, requestId);
             return def.reject('Error running upgrade process: [' + error + ']. RequestId: [' + requestId + ']');
