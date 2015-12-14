@@ -18,7 +18,7 @@
   "license": "ISC",
   "dependencies": {
     "clone": "^1.0.2",
-    "iot-client-lib": "^2.3.0",
+    "iot-client-lib": "^2.4.0",
     "mqtt": "^1.4.3",
     "node-clone": "^0.1.1",
     "q": "^1.4.1",
@@ -32,5 +32,16 @@
   "devDependencies": {
     "colors": "^1.1.2",
     "prompt": "^0.2.14"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vamship/iot-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vamship/iot-client/issues"
+  },
+  "homepage": "https://github.com/vamship/iot-client#readme"
 }
