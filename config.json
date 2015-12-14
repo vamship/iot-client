@@ -13,12 +13,13 @@
         "cnc-cloud": {
             "type": "CncCloud",
             "config": {
-                "host": "127.0.0.1",
-                "port": 1883,
+                "host": "api-iot-dev.analoggarage.com",
+                "port": 8443,
+                "protocol": "mqtts",
                 "networkInterface": "en0",
-                "gatewayname": "gateway1",
-                "username": "esp",
-                "password": "buddon",
+                "gatewayname": "pr4pi1",
+                "username": "adi-wilm-gateway",
+                "password": "forihavetastedthefruit",
                 "topics": ""
             }
         }

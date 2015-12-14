@@ -3,6 +3,7 @@
 
 var _util = require('util');
 var _net = require('net');
+var _tls = require('tls');
 var _q = require('q');
 var _mqtt = require('mqtt');
 var Connector = require('iot-client-lib').Connector;
@@ -58,6 +59,10 @@ MqttConnector.prototype._validate = function() {
     if (typeof this._config.topics !== 'string' ||
                this._config.topics.length <= 0) {
         return 'Connector configuration does not define a valid mqtt topics';
+    }
+
+    if (typeof this._config.protocol !== 'string' || this._config.protocol.length <= 0) {
+        this._config.protocol = 'mqtt';
     }
 
     return '';
@@ -121,8 +126,9 @@ MqttConnector.prototype._initClient = function() {
 
     this._logger.debug('Local network interface: [%s:%s]',
                                 this._config.networkInterface, localAddress);
+    var sockLib = (this._config.protocol === 'mqtt')? _net:_tls;
     this._client = new _mqtt.Client(function() {
-        return _net.connect({
+        return sockLib.connect({
             host: this._config.host,
             port: this._config.port,
             localAddress: localAddress
@@ -134,8 +140,9 @@ MqttConnector.prototype._initClient = function() {
     });
 
     this._client.on('connect', function() {
-        this._logger.info('Connected to mqtt broker at: [mqtt://%s:%s]',
-                                            this._config.host, this._config.port);
+        this._logger.info('Connected to mqtt broker at: [%s://%s:%s]',
+                                            this._config.protocol, this._config.host,
+                                            this._config.port);
         this._setupSubscriptions();
     }.bind(this));
 
