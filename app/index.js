@@ -10,12 +10,16 @@ var _package = require('../package.json');
 var Controller = require('iot-client-lib').Controller;
 var logger = _loggerProvider.getLogger('app');
 
+var MAX_RESTART_DURATION = 30 * 1000;
+var DEFAULT_REQUEST_ID = 'na';
+var DEFAULT_ACTION = 'na';
+
 logger.debug('IOT Gateway, Version: ', _package.version);
 logger.debug('Application ready to start. Configuration: ', GLOBAL.config);
 function handleCncReadError(error) {
     return {
-        action: 'na',
-        requestId: 'na',
+        action: DEFAULT_ACTION,
+        requestId: DEFAULT_REQUEST_ID,
         message: error,
         timestamp: new Date(0)
     };
@@ -31,16 +35,22 @@ function logLastCncAction(lastCncAction) {
         var date = new Date(lastCncAction.timestamp);
         logger.info('Last cnc timestamp: [%s]', date.toString());
     }
+    return lastCncAction;
 }
 
-function launchController() {
+function launchController(lastCncAction) {
     logger.debug('Creating controller');
     var controller = new Controller({
         moduleBasePath: GLOBAL.config.cfg_module_base_dir
     }, _loggerProvider);
 
+    var requestId = DEFAULT_REQUEST_ID;
+    if(Date.now() - MAX_RESTART_DURATION < lastCncAction.timestamp) {
+        requestId = lastCncAction.requestId
+    }
+
     logger.info('Initializing connectors');
-    controller.init(GLOBAL.config.cfg_config_file).then(function() {
+    controller.init(GLOBAL.config.cfg_config_file, requestId).then(function() {
         logger.info('Connectors successfully initialized');
     }, function(err) {
         logger.error('Error initializing connectors: ', err);
