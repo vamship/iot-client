@@ -10,14 +10,14 @@
     },
 
     "cloudConnectors": {
-        "cnc-cloud": {
+        "testgw-cnc-cloud": {
             "type": "CncCloud",
             "config": {
                 "host": "api-iot-dev.analoggarage.com",
                 "port": 8443,
                 "protocol": "mqtts",
                 "networkInterface": "en0",
-                "gatewayname": "pr4pi1",
+                "gatewayname": "testgw",
                 "username": "adi-wilm-gateway",
                 "password": "forihavetastedthefruit",
                 "topics": ""
@@ -26,7 +26,7 @@
     },
 
     "deviceConnectors": {
-        "cnc-gateway": {
+        "testgw-cnc-gateway": {
             "type": "CncGateway",
             "config": {
             }
