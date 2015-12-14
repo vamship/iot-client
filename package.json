@@ -1,6 +1,6 @@
 {
   "name": "iot-client",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "IOT client implementation with an extensible architecture for multiple sensors",
   "main": "app/index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "license": "ISC",
   "dependencies": {
     "clone": "^1.0.2",
-    "iot-client-lib": "^2.4.0",
+    "iot-client-lib": "^2.4.1",
     "mqtt": "^1.4.3",
     "node-clone": "^0.1.1",
     "q": "^1.4.1",
