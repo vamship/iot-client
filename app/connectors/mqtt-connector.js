@@ -147,8 +147,9 @@ MqttConnector.prototype._initClient = function() {
     }.bind(this));
 
     this._client.on('close', function() {
-        this._logger.info('Closed connection to mqtt broker at: [mqtt://%s:%s]',
-                                            this._config.host, this._config.port);
+        this._logger.info('Closed connection to mqtt broker at: [%s://%s:%s]',
+                                            this._config.protocol, this._config.host,
+                                            this._config.port);
     }.bind(this));
 
     this._client.on('message', function(topic, message) {
