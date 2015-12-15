@@ -5,6 +5,7 @@
 var _args = require('./arg-parser').args;
 var _loggerProvider = require('./logger-provider');
 var _cncHelper = require('./cnc-helper');
+var _setupHelper = require('./setup-helper');
 var _package = require('../package.json');
 
 var Controller = require('iot-client-lib').Controller;
@@ -88,7 +89,8 @@ process.on('exit', function() {
     _cncHelper.touchRestartFile();
 });
 
-_cncHelper.readLastCncAction()
+_setupHelper.ensureConfig()
+    .then(_cncHelper.readLastCncAction.bind(_cncHelper))
     .then(null, handleCncReadError)
     .then(logLastCncAction)
     .then(launchController)

@@ -4,11 +4,14 @@
 var _path = require('path');
 var _yargs = require('yargs');
 
+var configFilePath = _path.resolve(_path.join(__dirname, '../config.json'));
 var logsDir = _path.resolve(_path.join(__dirname, '../log'));
+var watchDir = _path.resolve(_path.join(__dirname, '../watch'));
+
 var connectorsDir = _path.resolve(_path.join(__dirname, './connectors'));
 
-var configFilePath = _path.resolve(_path.join(__dirname, '../config.json'));
-var watchDir = _path.resolve(_path.join(__dirname, '../watch'));
+var baselineConfigFilePath = _path.resolve(_path.join(__dirname, '../config.json'));
+var defaultNetworkInterface = 'eth0';
 
 var args = _yargs.usage('Usage: $0 [OPTIONS]')
                     .option('config-file', {
@@ -36,6 +39,32 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                                     'files will be written. This directory must exist, ' +
                                     'and must be writable by the user running the program.\r\n',
                     })
+                    .option('connector-dir', {
+                        demand: false,
+                        default: connectorsDir,
+                        type: 'string',
+                        describe: 'Path to the directory that contains ' +
+                                    'custom connector definitions. If not specified, this ' +
+                                    'value defaults to the the running directory.\r\n'
+                    })
+                    .option('baseline-config-file', {
+                        demand: false,
+                        default: baselineConfigFilePath,
+                        type: 'string',
+                        describe: 'Path to the baseline configuration file provided ' +
+                                    'with this program. This value should typically ' +
+                                    'remain unspecified, except in special circumstances.' +
+                                    '\r\n'
+                    })
+                    .option('default-network-interface', {
+                        demand: false,
+                        default: defaultNetworkInterface,
+                        type: 'string',
+                        describe: 'The default network interface for the gateway. ' +
+                                    'This should be the interface that allows access ' +
+                                    'to the internet.' +
+                                    '\r\n'
+                    })
                     .option('log-level', {
                         demand: false,
                         default: 'info',
@@ -59,27 +88,24 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                                     'to log files. Useful in environments where disk space ' +
                                     'is limited.\r\n'
                     })
-                    .option('connector-dir', {
-                        demand: false,
-                        default: connectorsDir,
-                        type: 'string',
-                        describe: 'Path to the directory that contains ' +
-                                    'custom connector definitions. If not specified, this ' +
-                                    'value defaults to the the running directory.\r\n'
-                    })
                     .help('help')
                     .alias('help', 'h')
                     .describe('help', 'Show application usage help')
                     .argv;
 
 GLOBAL.config = {};
-GLOBAL.config.cfg_no_log_console = args.noLogConsole;
-GLOBAL.config.cfg_no_log_file = args.noLogFile;
 GLOBAL.config.cfg_config_file = args.configFile;
-GLOBAL.config.cfg_logs_dir = args.logDir;
 GLOBAL.config.cfg_watch_dir = args.watchDir;
-GLOBAL.config.cfg_log_level = args.logLevel;
+GLOBAL.config.cfg_logs_dir = args.logDir;
+
 GLOBAL.config.cfg_module_base_dir = args.connectorDir;
+
+GLOBAL.config.cfg_log_level = args.logLevel;
+GLOBAL.config.cfg_no_log_file = args.noLogFile;
+GLOBAL.config.cfg_no_log_console = args.noLogConsole;
+
+GLOBAL.config.cfg_baseline_config_file = args.baselineConfigFile;
+GLOBAL.config.cfg_default_network_interface = args.defaultNetworkInterface;
 
 //NOTE: Logger must be initialized *after* global configuration has been set.
 var _loggerProvider = require('./logger-provider');

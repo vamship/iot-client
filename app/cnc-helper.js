@@ -8,7 +8,7 @@ var _childProcess = require('child_process');
 var _touch = require('touch');
 
 var _loggerProvider = require('./logger-provider');
-var logger = _loggerProvider.getLogger('app');
+var logger = _loggerProvider.getLogger('cnc-helper');
 
 var _cncFilePath = _path.resolve(GLOBAL.config.cfg_watch_dir, 'cnc.json'); 
 
