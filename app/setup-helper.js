@@ -80,7 +80,10 @@ function getMacAddress(dataBag) {
 function createConnectorConfig(dataBag) {
     logger.debug('Generating connector configuration');
     var config = dataBag.config;
-    var mqttHost = (process.env.NODE_ENV === 'production')? 'api-iot.analoggarage.com':
+    //TODO: This condition has been temporarily disabled, pending an updated on 
+    //the server. The "&& false" below needs to be removed once the server has
+    //been updated.
+    var mqttHost = (process.env.NODE_ENV === 'production' && false)? 'api-iot.analoggarage.com':
                                                             'api-iot-dev.analoggarage.com';
     var cloudConnectorName = 'cnc-cloud-' + dataBag.mac;
     config.cloudConnectors[cloudConnectorName] = {
