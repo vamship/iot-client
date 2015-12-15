@@ -14,7 +14,7 @@ var MAX_RESTART_DURATION = 30 * 1000;
 var DEFAULT_REQUEST_ID = 'na';
 var DEFAULT_ACTION = 'na';
 
-logger.debug('IOT Gateway, Version: ', _package.version);
+logger.info('IOT Gateway. Version: ', _package.version);
 logger.debug('Application ready to start. Configuration: ', GLOBAL.config);
 function handleCncReadError(error) {
     return {
