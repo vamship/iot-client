@@ -2,6 +2,7 @@
 'use strict';
 
 var _winston = require('winston');
+var _winstonDailyRotateFile = require('winston-daily-rotate-file');
 var _path = require('path');
 
 function _buildTransports(label) {
@@ -20,7 +21,7 @@ function _buildTransports(label) {
 
     //Optionally add the file transport
     if(!GLOBAL.config.cfg_no_log_file) {
-        transports.push(new _winston.transports.DailyRotateFile({
+        transports.push(new _winstonDailyRotateFile({
             level: GLOBAL.config.cfg_log_level,
             filename: _path.join(GLOBAL.config.cfg_logs_dir, 'app'),
             datePattern: '.yyyy-MM-dd.log',
