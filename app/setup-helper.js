@@ -11,10 +11,6 @@ var _loggerProvider = require('./logger-provider');
 
 var logger = _loggerProvider.getLogger('setup-helper');
 
-var MQTT_USERNAME = 'adi-wilm-gateway';
-var MQTT_PASSWORD = 'forihavetastedthefruit';
-
-
 function checkIfConfigExists() {
     logger.debug('Checking if config file already exists: [%s]', GLOBAL.config.cfg_config_file);
     var def = _q.defer();
@@ -94,8 +90,8 @@ function createConnectorConfig(dataBag) {
             protocol: 'mqtts',
             networkInterface: GLOBAL.config.cfg_default_network_interface,
             gatewayname: dataBag.mac,
-            username: MQTT_USERNAME,
-            password: MQTT_PASSWORD,
+            username: process.env.MQTT_USERNAME,
+            password: process.env.MQTT_PASSWORD,
             topics: ''
         }
     };
