@@ -1,7 +1,7 @@
 {
     "connectorTypes": {
         "Http": "./http-connector",
-        "VacuumPump": "./vacuum-pump-connector",
+        "EbaraPump": "./ebara-pump-connector",
         "Mqtt": "./mqtt-connector",
         "ButtonMqtt": "./button-mqtt-connector",
         "CncCloud": "./cnc-cloud-connector",
@@ -58,8 +58,8 @@
             }
         },
 
-        "vacuum-pump0": {
-            "type": "VacuumPump",
+        "ebara-pump0": {
+            "type": "EbaraPump",
             "config": {
                 "pollFrequency": 5000,
                 "portName": "/dev/pump0",
