@@ -50,4 +50,12 @@ CncGatewayConnector.prototype._stop = function() {
     return def.promise;
 };
 
+/**
+ * @class CncGatewayConnector
+ * @method addLogData
+ * @public
+ */
+Connector.prototype.addLogData = function(data) {
+};
+
 module.exports = CncGatewayConnector;
