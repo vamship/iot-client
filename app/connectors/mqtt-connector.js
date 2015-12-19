@@ -123,6 +123,7 @@ MqttConnector.prototype._processBrokerMessage = function(topic, message) {
  */
 MqttConnector.prototype._initClient = function() {
     var localAddress = _networkUtils.getIPv4Address(this._config.networkInterface);
+    var def = _q.defer();
 
     this._logger.debug('Local network interface: [%s:%s]',
                                 this._config.networkInterface, localAddress);
@@ -144,6 +145,14 @@ MqttConnector.prototype._initClient = function() {
                                             this._config.protocol, this._config.host,
                                             this._config.port);
         this._setupSubscriptions();
+        def.resolve();
+    }.bind(this));
+
+    this._client.on('error', function(err) {
+        this._logger.error('Error connecting to mqtt broker at: [%s://%s:%s]',
+                                            this._config.protocol, this._config.host,
+                                            this._config.port, err);
+        def.reject(err);
     }.bind(this));
 
     this._client.on('close', function() {
@@ -157,6 +166,8 @@ MqttConnector.prototype._initClient = function() {
         this._processBrokerMessage(topic, message);
 
     }.bind(this));
+
+    return def.promise;
 };
 
 /**
@@ -171,14 +182,15 @@ MqttConnector.prototype._start = function() {
         this._logger.error('Error validating connector configuration: [%s]', error);
         def.reject(error);
     } else {
-        this._stop().fin(function() {
-            try {
-                this._initClient();
+        try {
+            this._initClient().then(function() {
                 def.resolve();
-            } catch(ex) {
-                def.reject(ex);
-            }
-        }.bind(this));
+            }, function(err) {
+                def.reject(err);
+            });
+        } catch(ex) {
+            def.reject(ex);
+        }
     }
     return def.promise;
 };

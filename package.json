@@ -19,7 +19,6 @@
   "dependencies": {
     "clone": "^1.0.2",
     "iot-client-lib": "^2.4.1",
-    "macaddress": "^0.2.8",
     "mqtt": "^1.6.1",
     "node-clone": "^0.1.1",
     "q": "^1.4.1",

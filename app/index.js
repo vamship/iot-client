@@ -2,96 +2,29 @@
 /* jshint node:true */
 'use strict';
 
+var _package = require('../package.json');
 var _args = require('./arg-parser').args;
 var _loggerProvider = require('./logger-provider');
-var _cncHelper = require('./cnc-helper');
-var _setupHelper = require('./setup-helper');
-var _package = require('../package.json');
 
-var Controller = require('iot-client-lib').Controller;
+var _startupProcessor = require('./processors/startup-processor');
+var _controllerLauncher = require('./processors/controller-launcher');
+
+var _startupActions = require('./utils/startup-actions');
+var StartupHelper = require('./utils/startup-helper')
+var LogHelper = require('./utils/log-helper');
+
+
 var logger = _loggerProvider.getLogger('app');
-
-var MAX_RESTART_DURATION = 30 * 1000;
-var DEFAULT_REQUEST_ID = 'na';
-var DEFAULT_ACTION = 'na';
-
-logger.info('IOT Gateway. Version: ', _package.version);
-logger.debug('Application ready to start. Configuration: ', GLOBAL.config);
-function handleCncReadError(error) {
-    return {
-        action: DEFAULT_ACTION,
-        requestId: DEFAULT_REQUEST_ID,
-        message: error,
-        timestamp: new Date(0)
-    };
-}
-
-function logLastCncAction(lastCncAction) {
-    logger.info('Last cnc action: [%s]', lastCncAction.action);
-    logger.info('Last cnc requestId: [%s]', lastCncAction.requestId);
-    if(lastCncAction.message) {
-        logger.info('Last cnc message: [%s]', lastCncAction.message);
-    }
-    if(lastCncAction.timestamp) {
-        var date = new Date(lastCncAction.timestamp);
-        logger.info('Last cnc timestamp: [%s]', date.toString());
-    }
-    return lastCncAction;
-}
-
-function launchController(lastCncAction) {
-    logger.debug('Creating controller');
-    var controller = new Controller({
-        moduleBasePath: GLOBAL.config.cfg_module_base_dir
-    }, _loggerProvider);
-
-    var requestId = DEFAULT_REQUEST_ID;
-    if(Date.now() - MAX_RESTART_DURATION < lastCncAction.timestamp) {
-        requestId = lastCncAction.requestId
-    }
-
-    logger.info('Initializing connectors');
-    controller.init(GLOBAL.config.cfg_config_file, requestId).then(function() {
-        logger.info('Connectors successfully initialized');
-    }, function(err) {
-        logger.error('Error initializing connectors: ', err);
-        logger.warn('Program will continue to execute until explicitly stopped');
-    }).done();
-
-
-    controller.on(Controller.ADMIN_ACTION_EVENT, function(command) {
-        logger.info('Received admin action from controller. RequestId: [%s]', command.requestId);
-        var promise;
-        switch(command.action) {
-            case Controller.UPGRADE_ACTION:
-                logger.info('Upgrade requested. Will upgrade and terminate. RequestId: [%s]', command.requestId);
-                promise = _cncHelper.upgradeProgram(command.requestId)
-                            .then(_cncHelper.writeCncAction.bind(command.action, command.requestId));
-                break;
-            case Controller.SHUTDOWN_ACTION:
-                logger.info('Shutdown requested. Will automatically attempt restart. RequestId: [%s]', command.requestId);
-                promise = _cncHelper.writeCncAction(command.action, command.requestId);
-                break;
-            default:
-                var def = _q.defer();
-                def.resolve();
-                promise = def.promise;
-                break;
-        }
-
-        promise.then(function() {
-            logger.info('Terminating. RequestId: [%s]', command.requestId);
-        });
-    });
-};
+var startupHelper = new StartupHelper(logger);
+var logHelper = new LogHelper(logger);
 
 process.on('exit', function() {
-    _cncHelper.touchRestartFile();
+    //startupHelper.touchRestartFile();
 });
 
-_setupHelper.ensureConfig()
-    .then(_cncHelper.readLastCncAction.bind(_cncHelper))
-    .then(null, handleCncReadError)
-    .then(logLastCncAction)
-    .then(launchController)
+logger.info('IOT Gateway. Version: ', _package.version);
+logHelper.logObject(GLOBAL.config, 'info', true);
+
+_startupProcessor.process({ skip: false })
+    .then(_controllerLauncher.process.bind(_controllerLauncher))
     .done();

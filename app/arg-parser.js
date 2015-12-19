@@ -4,32 +4,26 @@
 var _path = require('path');
 var _yargs = require('yargs');
 
-var configFilePath = _path.resolve(_path.join(__dirname, '../config.json'));
+var configDir = _path.resolve(_path.join(__dirname, '../config'));
 var logsDir = _path.resolve(_path.join(__dirname, '../log'));
-var watchDir = _path.resolve(_path.join(__dirname, '../watch'));
 
 var connectorsDir = _path.resolve(_path.join(__dirname, './connectors'));
 
-var baselineConfigFilePath = _path.resolve(_path.join(__dirname, '../config.json'));
-var defaultNetworkInterface = 'eth0';
+var baselineConfigFilePath = _path.resolve(_path.join(__dirname, '../config/config.json'));
+var outboudNetworkInterface = 'eth0';
+var localNetworkInterface = 'wlan0';
 
 var args = _yargs.usage('Usage: $0 [OPTIONS]')
-                    .option('config-file', {
+                    .option('config-dir', {
                         demand: false,
-                        default: configFilePath,
+                        default: configDir,
                         type: 'string',
-                        describe: 'Path to the node configuration file. ' +
-                                    'Node configuration must be specified as JSON, ' +
-                                    'and the configuration file be writable by the ' +
-                                    'user running the program.\r\n'
-                    })
-                    .option('watch-dir', {
-                        demand: false,
-                        default: watchDir,
-                        type: 'string',
-                        describe: 'Path to the directory that will be watched for changes.' +
-                                    'Any changes will trigger an automatic program restart.' +
-                                    '\r\n'
+                        describe: 'Path to the configuration directory for the gateway. ' +
+                                    'This directory must contain the watch/ sub ' +
+                                    'directory, and any configuration files required ' +
+                                    'by the agent. Files in these directories must ' +
+                                    'be writable by the agent program' +
+                                    '.\r\n'
                     })
                     .option('log-dir', {
                         demand: false,
@@ -56,13 +50,22 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                                     'remain unspecified, except in special circumstances.' +
                                     '\r\n'
                     })
-                    .option('default-network-interface', {
+                    .option('outbound-network-interface', {
                         demand: false,
-                        default: defaultNetworkInterface,
+                        default: outboudNetworkInterface,
                         type: 'string',
-                        describe: 'The default network interface for the gateway. ' +
+                        describe: 'The outbound network interface for the gateway. ' +
                                     'This should be the interface that allows access ' +
                                     'to the internet.' +
+                                    '\r\n'
+                    })
+                    .option('local-network-interface', {
+                        demand: false,
+                        default: localNetworkInterface,
+                        type: 'string',
+                        describe: 'The local network interface for the gateway. ' +
+                                    'This should be the interface hosts local access ' +
+                                    'points, typically with no access to the internet.' +
                                     '\r\n'
                     })
                     .option('log-level', {
@@ -94,8 +97,11 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                     .argv;
 
 GLOBAL.config = {};
-GLOBAL.config.cfg_config_file = args.configFile;
-GLOBAL.config.cfg_watch_dir = args.watchDir;
+GLOBAL.config.cfg_config_dir = args.configDir;
+GLOBAL.config.cfg_config_file = _path.resolve(_path.join(args.configDir, 'config.json'));
+GLOBAL.config.cfg_startup_file = _path.resolve(_path.join(args.configDir, 'startup.json'));
+
+GLOBAL.config.cfg_restart_monitor_file = _path.resolve(_path.join(args.configDir, 'watch/monitor'));
 GLOBAL.config.cfg_logs_dir = args.logDir;
 
 GLOBAL.config.cfg_module_base_dir = args.connectorDir;
@@ -105,7 +111,8 @@ GLOBAL.config.cfg_no_log_file = args.noLogFile;
 GLOBAL.config.cfg_no_log_console = args.noLogConsole;
 
 GLOBAL.config.cfg_baseline_config_file = args.baselineConfigFile;
-GLOBAL.config.cfg_default_network_interface = args.defaultNetworkInterface;
+GLOBAL.config.cfg_outbound_network_interface = args.outboundNetworkInterface;
+GLOBAL.config.cfg_local_network_interface = args.localNetworkInterface;
 
 //NOTE: Logger must be initialized *after* global configuration has been set.
 var _loggerProvider = require('./logger-provider');
