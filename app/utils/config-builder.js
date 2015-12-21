@@ -11,7 +11,8 @@ var _networkUtils = require('../utils/network');
 
 var CONFIG_PATHS = {
     hostapd_conf: {
-        linux: '/etc/hostapd/hostapd.conf'
+        linux: '/etc/hostapd/hostapd.conf',
+        darwin: _path.resolve('./.tmp/hostapd.conf')
     },
     gateway_agent_conf: {
         linux: GLOBAL.config.cfg_config_file,
@@ -42,7 +43,7 @@ function ConfigBuilder(logger) {
         throw new Error(message);
     }
 
-    this._gatewayId = ifaceInfo[0].mac.replace(/:/g, '').toString();
+    this._gatewayId = ifaceInfo[0].mac.replace(/:/g, '').toUpperCase();
     this._localNetworkIP = _networkUtils.getIPv4Address(GLOBAL.config.cfg_local_network_interface);
     if(typeof this._localNetworkIP !== 'string' || this._localNetworkIP.length <= 0) {
         message = _util.format('Unable to obtain local ip address for interface: [%s]', 
@@ -141,6 +142,7 @@ ConfigBuilder.prototype._writeConfig = function(target, data) {
     var def = _q.defer();
 
     this._ensureConfig(target).then(function(path) {
+        this._logger.debug('Writing config data to file: [%s]', path);
         _fs.writeFile(path, data, function(err) {
             if(err) {
                 var message = _util.format('Error writing to file: [%s]', path, err);
@@ -148,7 +150,7 @@ ConfigBuilder.prototype._writeConfig = function(target, data) {
                 def.reject(message);
             }
             this._logger.info('Config file written successfully: [%s]', path);
-            this._logger.info('Config data: [%s]', data.toString());
+            this._logger.debug('Config data: [%s]', data.toString());
             def.resolve();
         }.bind(this))
     }.bind(this));
@@ -186,10 +188,10 @@ ConfigBuilder.prototype.generateHostApConfig = function(requestId) {
 
     return this._writeConfig('hostapd_conf', config.join('\n')).then(function() {
         this._logger.info('Host AP configuration updated successfully. RequestId: [%s]', requestId);
-    }, function(err) {
+    }.bind(this), function(err) {
         this._logger.error('Error updating host ap configuration. RequestId: [%s]', requestId, err);
         throw err;
-    });
+    }.bind(this));
 };
 
 /**

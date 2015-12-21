@@ -1,7 +1,9 @@
 /* jshint node:true */
 'use strict';
 
+var _path = require('path');
 var _fs = require('fs');
+var _util = require('util');
 var _q = require('q');
 
 var _loggerProvider = require('../logger-provider');
@@ -20,17 +22,39 @@ var configBuilder = new ConfigBuilder(logger);
 
 var STARTUP_REQUEST_TIMEOUT = 300 * 1000;
 
-function ensureGatewayConfigFile() {
+function checkConfigFileExists() {
+    var configFile = GLOBAL.config.cfg_config_file;
+    logger.debug('Checking if the agent configuration file exists: [%s]', configFile);
+
     var def = _q.defer();
     _fs.stat(GLOBAL.config.cfg_config_file, function(err, data) {
         if(err) {
-           logger.error('Unable to locate configuration file: [%s]', GLOBAL.config.cfg_config_file);
+           logger.error('Unable to locate configuration file: [%s]', configFile);
            def.reject();
            return;
         }
 
-        logger.info('Configuration file exists: [%s]', GLOBAL.config.cfg_config_file);
+        logger.info('Configuration file exists: [%s]', configFile);
         def.resolve();
+    });
+
+    return def.promise;
+}
+
+function checkWatchDirExists(data) {
+    var components = _path.parse(GLOBAL.config.cfg_restart_monitor_file);
+    logger.debug('Checking if the watch directory exists: [%s]', components.dir);
+
+    var def = _q.defer();
+    _fs.stat(components.dir, function(err, stats) {
+        if(err) {
+            var message = _util.format('Unable to find watch directory: [%s]', components.dir, err);
+            logger.error(message);
+            def.reject(message);
+            return;
+        }
+        logger.debug('Watch directory exists: [%s]', components.dir);
+        def.resolve(data);
     });
 
     return def.promise;
@@ -64,7 +88,8 @@ function processStartupAction(execInfo) {
                             .then(commandExecutor.enableHostAP.bind(commandExecutor, requestId))
                             .then(commandExecutor.enableDhcp.bind(commandExecutor, requestId))
                             .then(startupHelper.writeStartupAction.bind(
-                                            startupHelper, _startupActions.NO_ACTION, requestId));
+                                            startupHelper, _startupActions.NO_ACTION, requestId))
+                            .then(commandExecutor.reboot.bind(commandExecutor));
                 break;
             default:
                 logger.info('No action taken for startup action: [%s]', startupAction.action);
@@ -115,9 +140,10 @@ module.exports = {
             return def.promise;
         }
 
-        return ensureGatewayConfigFile()
+        return checkConfigFileExists()
             .then(startupHelper.getStartupAction.bind(startupHelper))
             .then(null, generateDefaultStartupAction)
+            .then(checkWatchDirExists)
             .then(processStartupAction(execInfo));
     }
 };

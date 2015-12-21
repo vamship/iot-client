@@ -11,19 +11,24 @@ var COMMAND_MAP = {
         darwin: { command: 'npm', args: [ 'update', '-g', 'iot-client' ] }
     },
     reboot: {
-        linux: { command: 'reboot', args: [] }
+        linux: { command: 'reboot', args: [] },
+        darwin: { command: 'echo', args: [ 'mock: reboot' ] }
     },
     enable_hostapd: {
-        linux: { command: 'update-rc.d', args: [ 'hostapd', 'enable' ] }
+        linux: { command: 'update-rc.d', args: [ 'hostapd', 'enable' ] },
+        darwin: { command: 'echo', args: [ 'mock: hostapd enable' ] }
     },
     disable_hostapd: {
-        linux: { command: 'update-rc.d', args: [ 'hostapd', 'disable' ] }
+        linux: { command: 'update-rc.d', args: [ 'hostapd', 'disable' ] },
+        darwin: { command: 'echo', args: [ 'mock: hostapd disable' ] }
     },
     enable_dhcpd: {
-        linux: { command: 'update-rc.d', args: [ 'isc-dhcp-server', 'enable' ] }
+        linux: { command: 'update-rc.d', args: [ 'isc-dhcp-server', 'enable' ] },
+        darwin: { command: 'echo', args: [ 'mock: dhcp enable' ] }
     },
     disable_dhcpd: {
-        linux: { command: 'update-rc.d', args: [ 'isc-dhcp-server', 'disable' ] }
+        linux: { command: 'update-rc.d', args: [ 'isc-dhcp-server', 'disable' ] },
+        darwin: { command: 'echo', args: [ 'mock: dhcp disable' ] }
     }
 };
 
