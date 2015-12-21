@@ -1,0 +1,16 @@
+{
+    "apps": [ {
+        "name": "iotclient",
+        "script": "app/index.js",
+        "args": [ "--config-dir=.tmp",
+                  "--no-log-file",
+                  "--log-level=silly" ],
+        "watch": [ "/root/code/iot-client/.tmp/watch" ],
+        "cwd": "/root/code/iot-client",
+        "env": {
+            "NODE_ENV": "production",
+            "LOCAL_MQTT_USERNAME": "adi-wilm",
+            "LOCAL_MQTT_PASSWORD": "tobeornottobe"
+        }
+    } ]
+}
