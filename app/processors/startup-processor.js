@@ -89,7 +89,7 @@ function processStartupAction(execInfo) {
                             .then(commandExecutor.enableDhcp.bind(commandExecutor, requestId))
                             .then(startupHelper.writeStartupAction.bind(
                                             startupHelper, _startupActions.NO_ACTION, requestId))
-                            .then(commandExecutor.reboot.bind(commandExecutor));
+                            .then(commandExecutor.reboot.bind(commandExecutor, requestId));
                 break;
             default:
                 logger.info('No action taken for startup action: [%s]', startupAction.action);
