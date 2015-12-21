@@ -132,7 +132,7 @@ CncGatewayConnector.prototype.addData = function(data, requestId) {
                 this._cloudLogger.info([ 'Error scheduling reboot: [%s]', err ], requestId);
             }.bind(this));
             break;
-        case 'disable_local_network':
+        case 'enable_local_network':
             this._commandExecutor.enableHostAP(requestId).then(function(){
                 this._cloudLogger.info([ 'Local AP daemon enabled on startup' ], requestId);
             }.bind(this), function(err) {
@@ -142,6 +142,18 @@ CncGatewayConnector.prototype.addData = function(data, requestId) {
                 this._cloudLogger.info([ 'Local DHCP daemon enabled on startup' ], requestId);
             }.bind(this), function(err) {
                 this._cloudLogger.info([ 'Error enabling local DHCP daemon on startup: [%s]', err ], requestId);
+            }.bind(this));
+            break;
+        case 'disable_local_network':
+            this._commandExecutor.disableHostAP(requestId).then(function(){
+                this._cloudLogger.info([ 'Local AP daemon disabled on startup' ], requestId);
+            }.bind(this), function(err) {
+                this._cloudLogger.info([ 'Error disabling local AP daemon on startup: [%s]', err ], requestId);
+            }.bind(this));
+            this._commandExecutor.disableDhcp(requestId).then(function(){
+                this._cloudLogger.info([ 'Local DHCP daemon disabled on startup' ], requestId);
+            }.bind(this), function(err) {
+                this._cloudLogger.info([ 'Error disabling local DHCP daemon on startup: [%s]', err ], requestId);
             }.bind(this));
             break;
         default:
