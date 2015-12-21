@@ -18,8 +18,8 @@
                 "protocol": "mqtts",
                 "networkInterface": "en0",
                 "gatewayname": "testgw",
-                "username": "adi-wilm",
-                "password": "tobeornottobe",
+                "username": "",
+                "password": "",
                 "topics": ""
             }
         }

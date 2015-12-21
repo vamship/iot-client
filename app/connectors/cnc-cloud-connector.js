@@ -3,6 +3,7 @@
 
 var _util = require('util');
 var MqttConnector = require('./mqtt-connector');
+var DEFAULT_USERNAME = 'user';
 
 /**
  * Connector that uses MQTT to communicate with the cloud for command and
@@ -24,7 +25,8 @@ _util.inherits(CncCloudConnector, MqttConnector);
  * @protected
  */
 CncCloudConnector.prototype._start = function() {
-    this._topicPrefix = ['', this._config.username, this._config.gatewayname, '' ].join('/');
+    var username = this._config.username || DEFAULT_USERNAME;
+    this._topicPrefix = ['', username, this._config.gatewayname, '' ].join('/');
     this._config.topics = 'cloud' + this._topicPrefix + '+';
     return CncCloudConnector.super_.prototype._start.call(this);
 }
