@@ -87,9 +87,9 @@ function processStartupAction(execInfo) {
                             .then(configBuilder.generateHostApConfig.bind(configBuilder, requestId))
                             .then(commandExecutor.enableHostAP.bind(commandExecutor, requestId))
                             .then(commandExecutor.enableDhcp.bind(commandExecutor, requestId))
+                            .then(commandExecutor.reboot.bind(commandExecutor, requestId))
                             .then(startupHelper.writeStartupAction.bind(
-                                            startupHelper, _startupActions.NO_ACTION, requestId))
-                            .then(commandExecutor.reboot.bind(commandExecutor, requestId));
+                                            startupHelper, _startupActions.NO_ACTION, requestId));
                 break;
             default:
                 logger.info('No action taken for startup action: [%s]', startupAction.action);
