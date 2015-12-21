@@ -12,6 +12,7 @@ var connectorsDir = _path.resolve(_path.join(__dirname, './connectors'));
 var baselineConfigFilePath = _path.resolve(_path.join(__dirname, '../config/config.json'));
 var outboudNetworkInterface = 'eth0';
 var localNetworkInterface = 'wlan0';
+var localNetworkGateway = '10.0.0.1';
 
 var args = _yargs.usage('Usage: $0 [OPTIONS]')
                     .option('config-dir', {
@@ -68,6 +69,14 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                                     'points, typically with no access to the internet.' +
                                     '\r\n'
                     })
+                    .option('local-network-gateway', {
+                        demand: false,
+                        default: localNetworkGateway,
+                        type: 'string',
+                        describe: 'The gateway ip address of the local wifi network that ' +
+                                    'will be created during the provisioning process. ' +
+                                    '\r\n'
+                    })
                     .option('log-level', {
                         demand: false,
                         default: 'info',
@@ -113,6 +122,7 @@ GLOBAL.config.cfg_no_log_console = args.noLogConsole;
 GLOBAL.config.cfg_baseline_config_file = args.baselineConfigFile;
 GLOBAL.config.cfg_outbound_network_interface = args.outboundNetworkInterface;
 GLOBAL.config.cfg_local_network_interface = args.localNetworkInterface;
+GLOBAL.config.cfg_local_network_gateway = args.localNetworkGateway;
 
 //NOTE: Logger must be initialized *after* global configuration has been set.
 var _loggerProvider = require('./logger-provider');

@@ -44,10 +44,10 @@ function ConfigBuilder(logger) {
     }
 
     this._gatewayId = ifaceInfo[0].mac.replace(/:/g, '').toUpperCase();
-    this._localNetworkIP = _networkUtils.getIPv4Address(GLOBAL.config.cfg_local_network_interface);
-    if(typeof this._localNetworkIP !== 'string' || this._localNetworkIP.length <= 0) {
-        message = _util.format('Unable to obtain local ip address for interface: [%s]', 
-                                            GLOBAL.config.cfg_local_network_interface);
+    this._localNetworkGatewayIP = GLOBAL.config.cfg_local_network_gateway;
+    if(typeof this._localNetworkGatewayIP !== 'string' || this._localNetworkGatewayIP.length <= 0) {
+        message = _util.format('Invalid local network gateway address specified: [%s]', 
+                                            this._localNetworkGatewayIP);
         this._logger.error(message);
         throw new Error(message);
     }
@@ -217,13 +217,11 @@ ConfigBuilder.prototype.generateGatewayAgentConfig = function(requestId) {
             newConfig.cloudConnectors[cloudConnectorName] = {
                 type: 'CncCloud',
                 config: {
-                    host: this._localNetworkIP,
+                    host: this._localNetworkGatewayIP,
                     port: 1883,
                     protocol: 'mqtt',
                     networkInterface: GLOBAL.config.cfg_local_network_interface,
                     gatewayname: this._gatewayId,
-                    username: PROCESS.env.LOCAL_MQTT_USERNAME,
-                    password: PROCESS.env.LOCAL_MQTT_PASSWORD,
                     topics: ''
                 }
             };
@@ -242,6 +240,7 @@ ConfigBuilder.prototype.generateGatewayAgentConfig = function(requestId) {
             this._logger.info('Gateway agent configuration updated successfully. RequestId: [%s]', requestId);
         }.bind(this), function(err) {
             this._logger.error('Error updating gateway agent configuration. RequestId: [%s]', requestId, err);
+            throw err;
         }.bind(this));
 };
 
