@@ -41,19 +41,9 @@ MqttConnector.prototype._validate = function() {
         return 'Connector configuration does not define a valid mqtt port number';
     }
     
-    if (typeof this._config.username !== 'string' ||
-               this._config.username.length <= 0) {
-        return 'Connector configuration does not define a valid mqtt username';
-    }
-    
     if (typeof this._config.networkInterface !== 'string' ||
                this._config.networkInterface.length <= 0) {
         return 'Connector configuration does not define a valid network interface for mqtt';
-    }
-    
-    if (typeof this._config.password !== 'string' ||
-               this._config.password.length <= 0) {
-        return 'Connector configuration does not define a valid mqtt password';
     }
     
     if (typeof this._config.topics !== 'string' ||
@@ -128,17 +118,26 @@ MqttConnector.prototype._initClient = function() {
     this._logger.debug('Local network interface: [%s:%s]',
                                 this._config.networkInterface, localAddress);
     var sockLib = (this._config.protocol === 'mqtt')? _net:_tls;
+    var mqttOptions = {
+        clientId: this._id
+    };
+    if (typeof this._config.username !== 'string' ||
+               this._config.username.length <= 0) {
+        mqttOptions.username = this._config.username;
+    }
+    
+    if (typeof this._config.password !== 'string' ||
+               this._config.password.length <= 0) {
+        mqttOptions.password = this._config.password;
+    }
+    
     this._client = new _mqtt.Client(function() {
         return sockLib.connect({
             host: this._config.host,
             port: this._config.port,
             localAddress: localAddress
         });
-    }.bind(this), {
-        clientId: this._id,
-        username: this._config.username,
-        password: this._config.password
-    });
+    }.bind(this), mqttOptions);
 
     this._client.on('connect', function() {
         this._logger.info('Connected to mqtt broker at: [%s://%s:%s]',
