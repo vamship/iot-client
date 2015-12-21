@@ -3,8 +3,11 @@
 
 var _util = require('util');
 var _q = require('q');
+
+var _startupActions = require('../utils/startup-actions');
 var Connector = require('iot-client-lib').Connector;
 var CommandExecutor = require('../utils/command-executor');
+var StartupHelper = require('../utils/startup-helper');
 
 var DEFAULT_REQUEST_ID = 'na';
 
@@ -19,6 +22,7 @@ var DEFAULT_REQUEST_ID = 'na';
 function CncGatewayConnector(id) {
     CncGatewayConnector.super_.call(this, id)
     this._commandExecutor = null;
+    this._startupHelper = null;
     this._cloudLogger = this._createCloudLogger();
 }
 
@@ -61,6 +65,7 @@ CncGatewayConnector.prototype._start = function() {
     // initialization.
     if(!this._commandExecutor) {
         this._commandExecutor = new CommandExecutor(this._logger);
+        this._startupHelper = new StartupHelper(this._logger);
     }
     var def = _q.defer();
     def.resolve();
@@ -134,26 +139,43 @@ CncGatewayConnector.prototype.addData = function(data, requestId) {
             break;
         case 'enable_local_network':
             this._commandExecutor.enableHostAP(requestId).then(function(){
-                this._cloudLogger.info([ 'Local AP daemon enabled on startup' ], requestId);
+                this._cloudLogger.info([ 'Local AP daemon enabled on boot' ], requestId);
             }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error enabling local AP daemon on startup: [%s]', err ], requestId);
+                this._cloudLogger.info([ 'Error enabling local AP daemon on boot: [%s]', err ], requestId);
             }.bind(this));
             this._commandExecutor.enableDhcp(requestId).then(function(){
-                this._cloudLogger.info([ 'Local DHCP daemon enabled on startup' ], requestId);
+                this._cloudLogger.info([ 'Local DHCP daemon enabled on boot' ], requestId);
             }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error enabling local DHCP daemon on startup: [%s]', err ], requestId);
+                this._cloudLogger.info([ 'Error enabling local DHCP daemon on boot: [%s]', err ], requestId);
             }.bind(this));
             break;
         case 'disable_local_network':
             this._commandExecutor.disableHostAP(requestId).then(function(){
-                this._cloudLogger.info([ 'Local AP daemon disabled on startup' ], requestId);
+                this._cloudLogger.info([ 'Local AP daemon disabled on boot' ], requestId);
             }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error disabling local AP daemon on startup: [%s]', err ], requestId);
+                this._cloudLogger.info([ 'Error disabling local AP daemon on boot: [%s]', err ], requestId);
             }.bind(this));
             this._commandExecutor.disableDhcp(requestId).then(function(){
-                this._cloudLogger.info([ 'Local DHCP daemon disabled on startup' ], requestId);
+                this._cloudLogger.info([ 'Local DHCP daemon disabled on boot' ], requestId);
             }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error disabling local DHCP daemon on startup: [%s]', err ], requestId);
+                this._cloudLogger.info([ 'Error disabling local DHCP daemon on boot: [%s]', err ], requestId);
+            }.bind(this));
+            break;
+        case 'reset_gateway':
+            this._commandExecutor.disableHostAP(requestId).then(function(){
+                this._cloudLogger.info([ 'Local AP daemon disabled on boot' ], requestId);
+            }.bind(this), function(err) {
+                this._cloudLogger.info([ 'Error disabling local AP daemon on boot: [%s]', err ], requestId);
+            }.bind(this));
+            this._commandExecutor.disableDhcp(requestId).then(function(){
+                this._cloudLogger.info([ 'Local DHCP daemon disabled on boot' ], requestId);
+            }.bind(this), function(err) {
+                this._cloudLogger.info([ 'Error disabling local DHCP daemon on boot: [%s]', err ], requestId);
+            }.bind(this));
+            startupHelper.writeStartupAction(_startupActions.PROVISION_MODE, requestId).then(function() {
+                this._cloudLogger.info([ 'Enabled provision mode on boot' ], requestId);
+            }.bind(this), function(err) {
+                this._cloudLogger.info([ 'Error enabling provision mode on boot' ], requestId);
             }.bind(this));
             break;
         default:
