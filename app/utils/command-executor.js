@@ -11,7 +11,7 @@ var COMMAND_MAP = {
         darwin: { command: 'npm', args: [ 'update', '-g', 'iot-client' ] }
     },
     reboot: {
-        linux: { command: 'reboot', args: [] },
+        linux: { command: 'shutdown', args: [ '-r', '+1' ] },
         darwin: { command: 'echo', args: [ 'mock: reboot' ] }
     },
     enable_hostapd: {
