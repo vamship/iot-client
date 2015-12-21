@@ -29,7 +29,7 @@ _util.inherits(CncGatewayConnector, Connector);
  * @method _createCloudLogger
  * @private
  */
-Controller.prototype._createCloudLogger = function() {
+CncGatewayConnector.prototype._createCloudLogger = function() {
     var logger = {};
     [ 'info', 'warn', 'error' ].forEach(function(methodName) {
         logger[methodName] = function(message, requestId) {
