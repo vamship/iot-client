@@ -100,12 +100,25 @@ CncGatewayConnector.prototype.addLogData = function(data) {
  */
 CncGatewayConnector.prototype.addData = function(data, requestId) {
     requestId = requestId || DEFAULT_REQUEST_ID;
-    if(!data || typeof data !== 'object') {
-        this._logger.warn('Data payload was in an invalid format: [%s]', data);
+    var message = '';
+    if(typeof data !== 'string' || data.length <= 0) {
+        message = _util.format('Invalid data payload received: [%s]', data);
+        this._logger.error(message);
+        this._cloudLogger.error(message, requestId);
+        return;
+    }
+    try {
+        data = JSON.parse(data);
+    } catch(ex) {
+        message = _util.format('Error parsing data payload', ex);
+        this._logger.error(message);
+        this._cloudLogger.error(message, requestId);
         return;
     }
     if(typeof data.command !== 'string') {
-        this._logger.warn('Data does not define a valid command: [%s]', data.command);
+        message = _util.format('Data does not define a valid command: [%s]', data.command);
+        this._logger.error(message);
+        this._cloudLogger.error(message, requestId);
         return;
     }
 
