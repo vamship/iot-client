@@ -222,6 +222,8 @@ ConfigBuilder.prototype.generateGatewayAgentConfig = function(requestId) {
                     protocol: 'mqtt',
                     networkInterface: GLOBAL.config.cfg_local_network_interface,
                     gatewayname: this._gatewayId,
+                    username: PROCESS.env.LOCAL_MQTT_USERNAME,
+                    password: PROCESS.env.LOCAL_MQTT_PASSWORD,
                     topics: ''
                 }
             };
