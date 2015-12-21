@@ -122,7 +122,6 @@ CncGatewayConnector.prototype.addData = function(data, requestId) {
         return;
     }
 
-    var data = null;
     var command = data.command.toLowerCase();
     this._logger.debug('Processing command from cloud: [%s]', data.command);
     switch(command) {
