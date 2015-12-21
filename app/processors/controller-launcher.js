@@ -1,5 +1,5 @@
-/* jshint node:true */
 'use strict';
+/* jshint node:true */
 
 var _q = require('q');
 
@@ -12,6 +12,8 @@ var Controller = require('iot-client-lib').Controller;
 var logger = _loggerProvider.getLogger('app::controller-launcher');
 var startupHelper = new StartupHelper(logger);
 var commandExecutor = new CommandExecutor(logger);
+
+var _controller = null;
 
 /**
  * Processor module that is responsible for configuring and launching the
@@ -52,13 +54,13 @@ module.exports = {
         }
 
         logger.debug('Creating controller');
-        var controller = new Controller({
+        _controller = new Controller({
             moduleBasePath: GLOBAL.config.cfg_module_base_dir
         }, _loggerProvider);
 
 
         logger.debug('Attaching admin action event handlers');
-        controller.on(Controller.ADMIN_ACTION_EVENT, function(command) {
+        _controller.on(Controller.ADMIN_ACTION_EVENT, function(command) {
             logger.info('Received admin action from controller. RequestId: [%s]', command.requestId);
             var promise;
             switch(command.action) {
@@ -83,13 +85,36 @@ module.exports = {
         });
 
         logger.info('Initializing connectors');
-        controller.init(GLOBAL.config.cfg_config_file, startupAction.requestId).then(function() {
+        _controller.init(GLOBAL.config.cfg_config_file, startupAction.requestId).then(function() {
             logger.info('Connectors successfully initialized');
             def.resolve(startupAction);
         }, function(err) {
             logger.error('One or more connectors failed to initialize: [%s]', err);
             def.reject(err);
         });
+
+        return def.promise;
+    },
+
+    /**
+     * Attempts a graceful shutdown of a previously initialized controller.
+     *
+     * @module controllerLauncher
+     * @return {Object} A promise that will be rejected based on the outcome of the
+     *          shutdown.
+     */
+    shutdown: function() {
+        var def = _q.defer();
+        if(_controller) {
+            logger.info('Attempting graceful controller shutdown.');
+            _controller.stop('ext_SIGINT').fin(function() {
+                logger.info('Controller shutdown complete.');
+                def.resolve();
+            });
+        } else {
+            logger.info('Controller not initialized. Nothing to shut down');
+            def.resolve();
+        }
 
         return def.promise;
     }

@@ -22,6 +22,14 @@ process.on('exit', function() {
     //startupHelper.touchRestartFile();
 });
 
+process.on('SIGINT', function(){
+    logger.info('SIGINT received. Shutting down controller');
+    _controllerLauncher.shutdown().fin(function() {
+        logger.info('Terminating agent');
+        process.exit(0);
+    });
+});
+
 logger.info('IOT Gateway. Version: ', _package.version);
 logHelper.logObject(GLOBAL.config, 'info', true);
 
