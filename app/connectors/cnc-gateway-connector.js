@@ -9,6 +9,8 @@ var SerialPort = _serialport.SerialPort;
 var Connector = require('iot-client-lib').Connector;
 var EbaraPumpParser = require('./io/ebara-pump-parser');
 
+var DEFAULT_REQUEST_ID = 'na';
+
 /**
  * Connector that performs specific cnc actions on the gateway, based on
  * commands from the cloud.
@@ -55,7 +57,21 @@ CncGatewayConnector.prototype._stop = function() {
  * @method addLogData
  * @public
  */
-Connector.prototype.addLogData = function(data) {
+CncGatewayConnector.prototype.addLogData = function(data) {
+};
+
+/**
+ * Handles data payloads from the cloud and takes necessary actions based
+ * on the data.
+ *
+ * @class CncGatewayConnector
+ * @method addData
+ * @param {Object} data The data obtained from the cloud
+ * @param {String} [requestId] An optional request id that can be used for logging.
+ */
+CncGatewayConnector.prototype.addData = function(data, requestId) {
+    requestId = requestId || DEFAULT_REQUEST_ID;
+    console.log(data);
 };
 
 module.exports = CncGatewayConnector;
