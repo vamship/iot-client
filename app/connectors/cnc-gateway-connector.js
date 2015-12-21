@@ -4,7 +4,7 @@
 var _util = require('util');
 var _q = require('q');
 var Connector = require('iot-client-lib').Connector;
-var CommandExecutor = require('../utils/startup-helper');
+var CommandExecutor = require('../utils/command-executor');
 
 var DEFAULT_REQUEST_ID = 'na';
 
