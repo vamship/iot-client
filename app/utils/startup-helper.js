@@ -25,17 +25,6 @@ function StartupHelper(logger) {
 };
 
 /**
- * Defines a startup action that places the agent in provisioning mode.
- *
- * @class StartupHelper
- * @property PROVISION_MODE
- * @type {String}
- * @static
- * @readonly
- */
-StartupHelper.PROVISION_MODE = 'startup_provision_mode';
-
-/**
  * Defines a startup action that indicates that no special actions need
  * to be taken on startup.
  *
@@ -46,6 +35,29 @@ StartupHelper.PROVISION_MODE = 'startup_provision_mode';
  * @readonly
  */
 StartupHelper.NO_ACTION = 'startup_no_action';
+
+/**
+ * Defines a startup action that indicates that this is a mock startup,
+ * and that the agent should be terminate without really changing anything.
+ *
+ * @class StartupHelper
+ * @property MOCK_STARTUP
+ * @type {String}
+ * @static
+ * @readonly
+ */
+StartupHelper.MOCK_STARTUP = 'startup_mock_startup';
+
+/**
+ * Defines a startup action that places the agent in provisioning mode.
+ *
+ * @class StartupHelper
+ * @property PROVISION_MODE
+ * @type {String}
+ * @static
+ * @readonly
+ */
+StartupHelper.PROVISION_MODE = 'startup_provision_mode';
 
 /**
  * Reads startup actions from the startup file, and returns the contents

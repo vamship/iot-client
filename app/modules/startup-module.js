@@ -21,30 +21,46 @@ var configBuilder = new ConfigBuilder(logger);
 
 var STARTUP_REQUEST_TIMEOUT = 300 * 1000;
 
-function checkConfigFileExists() {
+function checkConfigFileExists(startupAction) {
     var configFile = GLOBAL.config.cfg_config_file;
     logger.debug('Checking if the agent configuration file exists: [%s]', configFile);
 
     var def = _q.defer();
+
+    if(startupAction && typeof startupAction === 'object' &&
+       startupAction.action === StartupHelper.MOCK_STARTUP) {
+        logger.warn('Received mock startup action. No check for config file will be performed');
+        def.resolve(startupAction);
+        return def.promise;
+    }
+
     _fs.stat(GLOBAL.config.cfg_config_file, function(err, data) {
         if(err) {
            logger.error('Unable to locate configuration file: [%s]', configFile);
-           def.reject();
+           def.reject(startupAction);
            return;
         }
 
         logger.info('Configuration file exists: [%s]', configFile);
-        def.resolve();
+        def.resolve(startupAction);
     });
 
     return def.promise;
 }
 
-function checkWatchDirExists(data) {
+function checkWatchDirExists(startupAction) {
     var components = _path.parse(GLOBAL.config.cfg_restart_monitor_file);
     logger.debug('Checking if the watch directory exists: [%s]', components.dir);
 
     var def = _q.defer();
+
+    if(startupAction && typeof startupAction === 'object' &&
+       startupAction.action === StartupHelper.MOCK_STARTUP) {
+        logger.warn('Received mock startup action. No check for watch directory will be performed');
+        def.resolve(startupAction);
+        return def.promise;
+    }
+
     _fs.stat(components.dir, function(err, stats) {
         if(err) {
             var message = _util.format('Unable to find watch directory: [%s]', components.dir, err);
@@ -53,7 +69,7 @@ function checkWatchDirExists(data) {
             return;
         }
         logger.debug('Watch directory exists: [%s]', components.dir);
-        def.resolve(data);
+        def.resolve(startupAction);
     });
 
     return def.promise;
@@ -78,10 +94,10 @@ function processStartupAction(execInfo) {
         logger.info('Processing startup action: [%s]', startupAction.action);
         switch(startupAction.action) {
             case StartupHelper.NO_ACTION:
-                logger.info('No action required');
+                logger.info('Normal startup. No startup actions required');
                 break;
             case StartupHelper.PROVISION_MODE:
-                logger.info('Enabling provisioning mode');
+                logger.warn('Enabling provisioning mode');
                 execInfo.skip = true;
                 promise = configBuilder.generateGatewayAgentConfig(requestId)
                             .then(configBuilder.generateHostApConfig.bind(configBuilder, requestId))
@@ -90,6 +106,10 @@ function processStartupAction(execInfo) {
                             .then(commandExecutor.reboot.bind(commandExecutor, requestId))
                             .then(startupHelper.setStartupAction.bind(
                                             startupHelper, StartupHelper.NO_ACTION, requestId));
+                break;
+            case StartupHelper.MOCK_STARTUP:
+                logger.warn('Mock startup mode. No startup actions required');
+                execInfo.skip = true;
                 break;
             default:
                 logger.info('No action taken for startup action: [%s]', startupAction.action);
@@ -141,8 +161,8 @@ module.exports = {
             return def.promise;
         }
 
-        return checkConfigFileExists()
-            .then(startupHelper.getStartupAction.bind(startupHelper))
+        return startupHelper.getStartupAction()
+            .then(checkConfigFileExists)
             .then(null, generateDefaultStartupAction)
             .then(checkWatchDirExists)
             .then(processStartupAction(execInfo));
@@ -153,14 +173,16 @@ module.exports = {
      *
      * @module modules.startup
      * @method stop
+     * @param {String} [requestId] An optional request id to use for logging
      * @return {Object} A promise that will be rejected based on the outcome of the
      *          shutdown.
      */
-    stop: function() {
+    stop: function(requestId) {
+        requestId = requestId || 'na';
         var def = _q.defer();
-        logger.info('Attempting graceful shutdown');
+        logger.info('Attempting graceful shutdown. RequestId: [%s]', requestId);
         def.resolve();
-        logger.info('Module shutdown complete');
+        logger.info('Module shutdown complete. RequestId: [%s]', requestId);
         return def.promise;
     }
 };

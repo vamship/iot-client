@@ -102,19 +102,21 @@ module.exports = {
      *
      * @module modules.agent
      * @method stop
+     * @param {String} [requestId] An optional request id to use for logging
      * @return {Object} A promise that will be rejected based on the outcome of the
      *          shutdown.
      */
-    stop: function() {
+    stop: function(requestId) {
+        requestId = requestId || 'na';
         var def = _q.defer();
         if(_controller) {
-            logger.info('Attempting graceful shutdown.');
-            _controller.stop('ext_SIGINT').fin(function() {
-                logger.info('Module shutdown complete.');
+            logger.info('Attempting graceful shutdown. RequestId: [%s]', requestId);
+            _controller.stop(requestId).fin(function() {
+                logger.info('Module shutdown complete. RequestId: [%s]', requestId);
                 def.resolve();
             });
         } else {
-            logger.info('Controller not initialized. Nothing to shut down');
+            logger.info('Controller not initialized. Nothing to shut down. RequestId: [%s]', requestId);
             def.resolve();
         }
 
