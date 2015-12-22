@@ -7,8 +7,6 @@ var _path = require('path');
 var _util = require('util');
 var _q = require('q');
 
-var _networkUtils = require('../utils/network');
-
 var CONFIG_PATHS = {
     hostapd_conf: {
         linux: '/etc/hostapd/hostapd.conf',
@@ -174,7 +172,7 @@ ConfigBuilder.prototype.generateHostApConfig = function(requestId) {
         'interface=wlan0',
         '',
         'ssid=' + this._gatewayId,
-        'wpa_passphrase=whereforeartthou',
+        'wpa_passphrase=' + this._gatewayId.toLowerCase(),
         'channel=6',
         '',
         'wmm_enabled=1',
