@@ -9,18 +9,9 @@ var _loggerProvider = require('./logger-provider');
 var _startupProcessor = require('./processors/startup-processor');
 var _controllerLauncher = require('./processors/controller-launcher');
 
-var _startupActions = require('./utils/startup-actions');
-var StartupHelper = require('./utils/startup-helper')
 var LogHelper = require('./utils/log-helper');
-
-
 var logger = _loggerProvider.getLogger('app');
-var startupHelper = new StartupHelper(logger);
 var logHelper = new LogHelper(logger);
-
-process.on('exit', function() {
-    //startupHelper.touchRestartFile();
-});
 
 process.on('SIGINT', function(){
     logger.info('SIGINT received. Shutting down controller');

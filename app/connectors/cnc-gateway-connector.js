@@ -4,7 +4,6 @@
 var _util = require('util');
 var _q = require('q');
 
-var _startupActions = require('../utils/startup-actions');
 var Connector = require('iot-client-lib').Connector;
 var CommandExecutor = require('../utils/command-executor');
 var StartupHelper = require('../utils/startup-helper');
@@ -172,7 +171,7 @@ CncGatewayConnector.prototype.addData = function(data, requestId) {
             }.bind(this), function(err) {
                 this._cloudLogger.info([ 'Error disabling local DHCP daemon on boot: [%s]', err ], requestId);
             }.bind(this));
-            this._startupHelper.writeStartupAction(_startupActions.PROVISION_MODE, requestId).then(function() {
+            this._startupHelper.setStartupAction(StartupHelper.PROVISION_MODE, requestId).then(function() {
                 this._cloudLogger.info([ 'Enabled provision mode on boot' ], requestId);
             }.bind(this), function(err) {
                 this._cloudLogger.info([ 'Error enabling provision mode on boot' ], requestId);

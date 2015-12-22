@@ -7,7 +7,6 @@ var _util = require('util');
 var _q = require('q');
 
 var _loggerProvider = require('../logger-provider');
-var _startupActions = require('../utils/startup-actions');
 
 var LogHelper = require('../utils/log-helper');
 var StartupHelper = require('../utils/startup-helper');
@@ -63,7 +62,7 @@ function checkWatchDirExists(data) {
 function generateDefaultStartupAction(err) {
     logger.warn('Unable to read gateway config or startup file. Triggering provision mode');
     return {
-        action: _startupActions.PROVISION_MODE,
+        action: StartupHelper.PROVISION_MODE,
         requestId: 'startup',
         message: 'Unable to read last recorded startup action',
         timestamp: Date.now()
@@ -77,10 +76,10 @@ function processStartupAction(execInfo) {
         var promise = null;
         logger.info('Processing startup action: [%s]', startupAction.action);
         switch(startupAction.action) {
-            case _startupActions.NO_ACTION:
+            case StartupHelper.NO_ACTION:
                 logger.info('No action required');
                 break;
-            case _startupActions.PROVISION_MODE:
+            case StartupHelper.PROVISION_MODE:
                 logger.info('Enabling provisioning mode');
                 execInfo.skip = true;
                 promise = configBuilder.generateGatewayAgentConfig(requestId)
@@ -88,8 +87,8 @@ function processStartupAction(execInfo) {
                             .then(commandExecutor.enableHostAP.bind(commandExecutor, requestId))
                             .then(commandExecutor.enableDhcp.bind(commandExecutor, requestId))
                             .then(commandExecutor.reboot.bind(commandExecutor, requestId))
-                            .then(startupHelper.writeStartupAction.bind(
-                                            startupHelper, _startupActions.NO_ACTION, requestId));
+                            .then(startupHelper.setStartupAction.bind(
+                                            startupHelper, StartupHelper.NO_ACTION, requestId));
                 break;
             default:
                 logger.info('No action taken for startup action: [%s]', startupAction.action);
