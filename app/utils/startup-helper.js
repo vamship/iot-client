@@ -57,7 +57,7 @@ StartupHelper.prototype.getStartupAction = function() {
     }.bind(this));
 
     return def.promise;
-},
+};
 
 /**
  * Writes data to the startup file.
@@ -92,7 +92,7 @@ StartupHelper.prototype.writeStartupAction = function(action, requestId, message
     }.bind(this));
 
     return def.promise;
-},
+};
 
 /**
  * Touches a file that is watched by an external process, triggering restart.
@@ -122,6 +122,6 @@ StartupHelper.prototype.touchRestartMonitor = function(isAsync) {
         _touch.sync(this._restartMonitorFile, { force: true });
         this._logger.debug('Restart monitor file touched (sync)');
     }
-}
+};
 
 module.exports = StartupHelper;
