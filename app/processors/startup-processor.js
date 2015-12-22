@@ -109,14 +109,14 @@ function processStartupAction(execInfo) {
  * Processor module that is responsible for reading previous startup actions
  * (as written to the startup file), and taking necessary actions.
  *
- * @module startupProcessor
+ * @module processors.startup
  */
 module.exports = {
     /**
      * Processes the last startup action (obtained from the startup file), and executes
      * additional actions as necessary.
      * 
-     * @module startupProcessor
+     * @module processors.startup
      * @param {Object} execInfo An object that functions as a data bag, allowing
      *          transfer of data across asynchronous calls. This object will typically
      *          contain information that informs processor execution.

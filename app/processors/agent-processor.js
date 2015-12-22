@@ -9,7 +9,7 @@ var CommandExecutor = require('../utils/command-executor');
 
 var Controller = require('iot-client-lib').Controller;
 
-var logger = _loggerProvider.getLogger('app::controller-launcher');
+var logger = _loggerProvider.getLogger('app::agent-processor');
 var startupHelper = new StartupHelper(logger);
 var commandExecutor = new CommandExecutor(logger);
 
@@ -19,13 +19,13 @@ var _controller = null;
  * Processor module that is responsible for configuring and launching the
  * controller.
  *
- * @module controllerLauncher
+ * @module processors.agent
  */
 module.exports = {
     /**
      * Configures and launches the controller.
      * 
-     * @module controllerLauncher
+     * @module processors.agent
      * @param {Object} execInfo An object that defines how the module executes its
      *          processing logic.
      * @return {Object} A promise that will be rejected based on the outcome of the
@@ -99,7 +99,7 @@ module.exports = {
     /**
      * Attempts a graceful shutdown of a previously initialized controller.
      *
-     * @module controllerLauncher
+     * @module processors.agent
      * @return {Object} A promise that will be rejected based on the outcome of the
      *          shutdown.
      */
