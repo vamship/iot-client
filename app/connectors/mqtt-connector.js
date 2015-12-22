@@ -7,7 +7,7 @@ var _tls = require('tls');
 var _q = require('q');
 var _mqtt = require('mqtt');
 var Connector = require('iot-client-lib').Connector;
-var _networkUtils = require('../utils/network');
+var _networkUtils = require('../utils/network-utils');
 
 /**
  * Connector that uses MQTT to communicate with sensors connected to a
