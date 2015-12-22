@@ -9,7 +9,7 @@ var CommandExecutor = require('../utils/command-executor');
 
 var Controller = require('iot-client-lib').Controller;
 
-var logger = _loggerProvider.getLogger('app::agent-processor');
+var logger = _loggerProvider.getLogger('app::agent-module');
 var startupHelper = new StartupHelper(logger);
 var commandExecutor = new CommandExecutor(logger);
 
@@ -19,19 +19,20 @@ var _controller = null;
  * Processor module that is responsible for configuring and launching the
  * controller.
  *
- * @module processors.agent
+ * @module modules.agent
  */
 module.exports = {
     /**
      * Configures and launches the controller.
      * 
-     * @module processors.agent
+     * @module modules.agent
+     * @method start
      * @param {Object} execInfo An object that defines how the module executes its
      *          processing logic.
      * @return {Object} A promise that will be rejected based on the outcome of the
      *          processing.
      */
-    process: function(execInfo) {
+    start: function(execInfo) {
         if(!execInfo || typeof execInfo !== 'object') {
             logger.error('Invalid execution info specified (arg #1)');
             throw new Error('Invalid execution info specified (arg #1)');
@@ -99,16 +100,17 @@ module.exports = {
     /**
      * Attempts a graceful shutdown of a previously initialized controller.
      *
-     * @module processors.agent
+     * @module modules.agent
+     * @method stop
      * @return {Object} A promise that will be rejected based on the outcome of the
      *          shutdown.
      */
-    shutdown: function() {
+    stop: function() {
         var def = _q.defer();
         if(_controller) {
-            logger.info('Attempting graceful controller shutdown.');
+            logger.info('Attempting graceful shutdown.');
             _controller.stop('ext_SIGINT').fin(function() {
-                logger.info('Controller shutdown complete.');
+                logger.info('Module shutdown complete.');
                 def.resolve();
             });
         } else {

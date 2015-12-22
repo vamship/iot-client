@@ -13,7 +13,7 @@ var StartupHelper = require('../utils/startup-helper');
 var CommandExecutor = require('../utils/command-executor');
 var ConfigBuilder = require('../utils/config-builder');
 
-var logger = _loggerProvider.getLogger('app::startup-processor');
+var logger = _loggerProvider.getLogger('app::startup-module');
 var startupHelper = new StartupHelper(logger);
 var logHelper = new LogHelper(logger);
 var commandExecutor = new CommandExecutor(logger);
@@ -109,21 +109,22 @@ function processStartupAction(execInfo) {
  * Processor module that is responsible for reading previous startup actions
  * (as written to the startup file), and taking necessary actions.
  *
- * @module processors.startup
+ * @module modules.startup
  */
 module.exports = {
     /**
      * Processes the last startup action (obtained from the startup file), and executes
      * additional actions as necessary.
      * 
-     * @module processors.startup
+     * @module modules.startup
+     * @method start
      * @param {Object} execInfo An object that functions as a data bag, allowing
      *          transfer of data across asynchronous calls. This object will typically
-     *          contain information that informs processor execution.
+     *          contain information that informs module execution.
      * @return {Object} A promise that will be rejected based on the outcome of the
      *          processing.
      */
-    process: function(execInfo) {
+    start: function(execInfo) {
         if(!execInfo || typeof execInfo !== 'object') {
             logger.error('Invalid execution info specified (arg #1)');
             throw new Error('Invalid execution info specified (arg #1)');
@@ -144,5 +145,21 @@ module.exports = {
             .then(null, generateDefaultStartupAction)
             .then(checkWatchDirExists)
             .then(processStartupAction(execInfo));
+    },
+
+    /**
+     * Attempts a graceful shutdown of the module.
+     *
+     * @module modules.startup
+     * @method stop
+     * @return {Object} A promise that will be rejected based on the outcome of the
+     *          shutdown.
+     */
+    stop: function() {
+        var def = _q.defer();
+        logger.info('Attempting graceful shutdown');
+        def.resolve();
+        logger.info('Module shutdown complete');
+        return def.promise;
     }
 };
