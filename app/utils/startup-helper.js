@@ -25,6 +25,29 @@ function StartupHelper(logger) {
 };
 
 /**
+ * Defines a startup action that places the agent in provisioning mode.
+ *
+ * @class StartupHelper
+ * @property PROVISION_MODE
+ * @type {String}
+ * @static
+ * @readonly
+ */
+StartupHelper.PROVISION_MODE = 'startup_provision_mode';
+
+/**
+ * Defines a startup action that indicates that no special actions need
+ * to be taken on startup.
+ *
+ * @class StartupHelper
+ * @property NO_ACTION
+ * @type {String}
+ * @static
+ * @readonly
+ */
+StartupHelper.NO_ACTION = 'startup_no_action';
+
+/**
  * Reads startup actions from the startup file, and returns the contents
  * of the file.
  *
@@ -60,17 +83,18 @@ StartupHelper.prototype.getStartupAction = function() {
 };
 
 /**
- * Writes data to the startup file.
+ * Sets a specific startup action that will be processed when the agent
+ * is restarted.
  *
  * @class StartupHelper
- * @method writeStartupAction
+ * @method setStartupAction
  * @param {String} action The action to write
  * @param {String} [requestId] An optional request id
  * @param {String} [message] An optional message to record with the action
  * @return {Object} A promise that will be rejected or resolved based on 
  *          the write operation.
  */
-StartupHelper.prototype.writeStartupAction = function(action, requestId, message) {
+StartupHelper.prototype.setStartupAction = function(action, requestId, message) {
     var payload = {
         action: action,
         requestId: requestId || 'na',

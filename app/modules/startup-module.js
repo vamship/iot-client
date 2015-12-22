@@ -61,6 +61,7 @@ function checkWatchDirExists(data) {
 
 function generateDefaultStartupAction(err) {
     logger.warn('Unable to read gateway config or startup file. Triggering provision mode');
+    
     return {
         action: StartupHelper.PROVISION_MODE,
         requestId: 'startup',
