@@ -67,7 +67,7 @@ module.exports = {
             switch(command.action) {
                 case Controller.UPGRADE_ACTION:
                     logger.info('Upgrade requested. Will upgrade and terminate. RequestId: [%s]', command.requestId);
-                    promise = commandExecutor.upgradeProgram(command.requestId)
+                    promise = commandExecutor.upgradeAgent(command.requestId)
                                 .then(startupHelper.touchRestartMonitor.bind(startupHelper));
                     break;
                 case Controller.SHUTDOWN_ACTION:
