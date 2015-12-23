@@ -224,7 +224,7 @@ ConfigBuilder.prototype.generateGatewayAgentConfig = function(requestId) {
                 }
             };
 
-            var deviceConnectorName = 'cnc-device';
+            var deviceConnectorName = 'cnc-gateway';
             newConfig.deviceConnectors[deviceConnectorName] = {
                 type: 'CncGateway',
                 config: {}

@@ -18,7 +18,7 @@
   "license": "ISC",
   "dependencies": {
     "clone": "^1.0.2",
-    "iot-client-lib": "^2.4.1",
+    "iot-client-lib": "^2.4.2",
     "mqtt": "^1.6.1",
     "node-clone": "^0.1.1",
     "q": "^1.4.1",
