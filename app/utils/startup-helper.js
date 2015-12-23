@@ -21,7 +21,7 @@ function StartupHelper(logger) {
     }
     this._logger = logger;
     this._startupFilePath = GLOBAL.config.cfg_startup_file;
-    this._restartMonitorFile = GLOBAL.config.restart_monitor_file;
+    this._restartMonitorFile = GLOBAL.config.cfg_restart_monitor_file;
 };
 
 /**
@@ -141,23 +141,29 @@ StartupHelper.prototype.setStartupAction = function(action, requestId, message) 
  */
 StartupHelper.prototype.touchRestartMonitor = function(isAsync) {
     isAsync = !!isAsync;
+    var def = _q.defer();
     if(isAsync) {
-        var def = _q.defer();
-        this._logger.debug('Touching file asynchronously');
+        this._logger.info('Touching restart monitor asynchronously: [%s]', this._restartMonitorFile);
         _touch(this._restartMonitorFile, { force: true }, function(err) {
             if(err) {
                 this._logger.error('Error touching restart monitor: ', err);
                 def.reject(err);
             }
-            this._logger.debug('Restart monitor file touched (async)');
+            this._logger.info('Restart monitor file touched (async): [%s]', this._restartMonitorFile);
             def.resolve();
         }.bind(this));
-        return def.promise;
     } else {
-        this._logger.debug('Touching file synchronously');
-        _touch.sync(this._restartMonitorFile, { force: true });
-        this._logger.debug('Restart monitor file touched (sync)');
+        this._logger.info('Touching restart monitor synchronously: [%s]', this._restartMonitorFile);
+        try {
+            _touch.sync(this._restartMonitorFile, { force: true });
+            this._logger.info('Restart monitor file touched (sync): [%s]', this._restartMonitorFile);
+            def.resolve();
+        } catch(ex) {
+            this._logger.error('Error touching restart monitor: ', ex);
+            def.reject(err);
+        }
     }
+    return def.promise;
 };
 
 module.exports = StartupHelper;

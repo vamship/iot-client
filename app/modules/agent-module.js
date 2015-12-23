@@ -82,7 +82,7 @@ module.exports = {
             }
             promise.then(function() {
                 logger.info('Terminating. RequestId: [%s]', command.requestId);
-            });
+            }).done();
         });
 
         logger.info('Initializing connectors');

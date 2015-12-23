@@ -90,7 +90,7 @@ CommandExecutor.prototype._runCommand = function(command, suppressLogs) {
         args = [];
     }
 
-    this._logger.debug('Executing command: [%s][%s]', command, args);
+    this._logger.info('Executing command: [%s][%s]', command, args);
     var proc = _childProcess.spawn(command, args);
 
     if(!suppressLogs) {
@@ -133,14 +133,14 @@ CommandExecutor.prototype._runCommand = function(command, suppressLogs) {
  *          the write operation.
  */
 CommandExecutor.prototype.upgradeAgent = function(requestId) {
-    this._logger.debug('Upgrading iot client program. RequestId: [%s]', requestId);
+    this._logger.info('Upgrading iot client program. RequestId: [%s]', requestId);
 
     return this._runCommand('update_gateway').then(function() {
         this._logger.info('Agent upgrade completed successfully. RequestId: [%s]', requestId);
-    }, function(err) {
+    }.bind(this), function(err) {
         this._logger.error('Agent upgrade failed. RequestId: [%s]', requestId, err);
         throw err;
-    });
+    }.bind(this));
 };
 
 /**
@@ -153,7 +153,7 @@ CommandExecutor.prototype.upgradeAgent = function(requestId) {
  *          the write operation.
  */
 CommandExecutor.prototype.reboot = function(requestId) {
-    this._logger.debug('Rebooting current system. RequestId: [%s]', requestId);
+    this._logger.info('Rebooting current system. RequestId: [%s]', requestId);
 
     return this._runCommand('reboot').then(function() {
         this._logger.info('Reboot command issued successfully. RequestId: [%s]', requestId);
@@ -173,7 +173,7 @@ CommandExecutor.prototype.reboot = function(requestId) {
  *          the write operation.
  */
 CommandExecutor.prototype.enableHostAP = function(requestId) {
-    this._logger.debug('Enabling auto start of host ap daemon. RequestId: [%s]', requestId);
+    this._logger.info('Enabling auto start of host ap daemon. RequestId: [%s]', requestId);
 
     return this._runCommand('enable_hostapd').then(function() {
         this._logger.info('Host AP daemon successfully enabled for auto start or boot. RequestId: [%s]', requestId);
@@ -193,7 +193,7 @@ CommandExecutor.prototype.enableHostAP = function(requestId) {
  *          the write operation.
  */
 CommandExecutor.prototype.disableHostAP = function(requestId) {
-    this._logger.debug('Disabling auto start of host ap daemon. RequestId: [%s]', requestId);
+    this._logger.info('Disabling auto start of host ap daemon. RequestId: [%s]', requestId);
 
     return this._runCommand('disable_hostapd').then(function() {
         this._logger.info('Host AP daemon successfully disabled from auto starting or boot. RequestId: [%s]', requestId);
@@ -213,7 +213,7 @@ CommandExecutor.prototype.disableHostAP = function(requestId) {
  *          the write operation.
  */
 CommandExecutor.prototype.enableDhcp = function(requestId) {
-    this._logger.debug('Enabling auto start of dhcp daemon. RequestId: [%s]', requestId);
+    this._logger.info('Enabling auto start of dhcp daemon. RequestId: [%s]', requestId);
 
     return this._runCommand('enable_dhcpd').then(function() {
         this._logger.info('DHCP daemon successfully enabled for auto start or boot. RequestId: [%s]', requestId);
@@ -233,7 +233,7 @@ CommandExecutor.prototype.enableDhcp = function(requestId) {
  *          the write operation.
  */
 CommandExecutor.prototype.disableDhcp = function(requestId) {
-    this._logger.debug('Disabling auto start of dhcp daemon. RequestId: [%s]', requestId);
+    this._logger.info('Disabling auto start of dhcp daemon. RequestId: [%s]', requestId);
 
     return this._runCommand('disable_dhcpd').then(function() {
         this._logger.info('DHCP daemon successfully disabled from auto starting or boot. RequestId: [%s]', requestId);
