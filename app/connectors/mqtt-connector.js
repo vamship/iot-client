@@ -121,13 +121,13 @@ MqttConnector.prototype._initClient = function() {
     var mqttOptions = {
         clientId: this._id
     };
-    if (typeof this._config.username !== 'string' ||
-               this._config.username.length <= 0) {
+    if (typeof this._config.username === 'string' &&
+               this._config.username.length > 0) {
         mqttOptions.username = this._config.username;
     }
     
-    if (typeof this._config.password !== 'string' ||
-               this._config.password.length <= 0) {
+    if (typeof this._config.password === 'string' &&
+               this._config.password.length > 0) {
         mqttOptions.password = this._config.password;
     }
     
