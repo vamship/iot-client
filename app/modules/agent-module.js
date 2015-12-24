@@ -61,18 +61,22 @@ module.exports = {
 
 
         logger.debug('Attaching admin action event handlers');
-        _controller.on(Controller.ADMIN_ACTION_EVENT, function(command) {
-            logger.info('Received admin action from controller. RequestId: [%s]', command.requestId);
+        _controller.on(Controller.MAINTENANCE_EVENT, function(command) {
+            logger.info('Received maintenance event from controller. RequestId: [%s]', command.requestId);
             var promise;
             switch(command.action) {
-                case Controller.UPGRADE_ACTION:
-                    logger.info('Upgrade requested. Will upgrade and terminate. RequestId: [%s]', command.requestId);
+                case 'upgrade_program':
+                    logger.info('Upgrade requested. Will upgrade and attempt program restart. RequestId: [%s]', command.requestId);
                     promise = commandExecutor.upgradeAgent(command.requestId)
                                 .then(startupHelper.touchRestartMonitor.bind(startupHelper));
                     break;
-                case Controller.SHUTDOWN_ACTION:
-                    logger.info('Shutdown requested. Will automatically attempt restart. RequestId: [%s]', command.requestId);
+                case 'shutdown_program':
+                    logger.info('Shutdown requested. Will automatically attempt program restart. RequestId: [%s]', command.requestId);
                     promise = startupHelper.touchRestartMonitor();
+                    break;
+                case 'reboot_system':
+                    logger.info('System reboot requested. RequestId: [%s]', command.requestId);
+                    promise = commandExecutor.reboot(requestId);
                     break;
                 default:
                     var def = _q.defer();

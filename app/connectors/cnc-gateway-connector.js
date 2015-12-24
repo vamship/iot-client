@@ -129,13 +129,6 @@ CncGatewayConnector.prototype.addData = function(data, requestId) {
     var command = data.command.toLowerCase();
     this._logger.debug('Processing command from cloud: [%s]', data.command);
     switch(command) {
-        case 'reboot':
-            this._commandExecutor.reboot(requestId).then(function(){
-                this._cloudLogger.info([ 'Reboot scheduled' ], requestId);
-            }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error scheduling reboot: [%s]', err ], requestId);
-            }.bind(this));
-            break;
         case 'enable_local_network':
             this._commandExecutor.enableHostAP(requestId).then(function(){
                 this._cloudLogger.info([ 'Local AP daemon enabled on boot' ], requestId);
