@@ -100,7 +100,7 @@ CommandExecutor.prototype._runCommand = function(command, suppressLogs) {
         }.bind(this));
 
         proc.stderr.on('data', function(data) {
-            this._logger.error('[STDERR] [%s]', data.toString());
+            this._logger.info('[STDERR] [%s]', data.toString());
         }.bind(this));
     }
 
