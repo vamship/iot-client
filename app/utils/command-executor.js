@@ -96,11 +96,11 @@ CommandExecutor.prototype._runCommand = function(command, suppressLogs) {
     if(!suppressLogs) {
         this._logger.debug('Enabling output/error logs for command: [%s][%s]', command, args);
         proc.stdout.on('data', function(data) {
-            this._logger.info('[%s] [STDOUT]', data.toString());
+            this._logger.info('[STDOUT] [%s]', data.toString());
         }.bind(this));
 
         proc.stderr.on('data', function(data) {
-            this._logger.error('[%s] [STDERR]', data.toString());
+            this._logger.error('[STDERR] [%s]', data.toString());
         }.bind(this));
     }
 
