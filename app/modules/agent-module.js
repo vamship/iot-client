@@ -62,9 +62,9 @@ module.exports = {
 
         logger.debug('Attaching admin action event handlers');
         _controller.on(Controller.MAINTENANCE_EVENT, function(command) {
-            logger.info('Received maintenance event from controller. RequestId: [%s]', command.requestId);
+            logger.info('Received maintenance event from controller: [%s]. RequestId: [%s]', command.command, command.requestId);
             var promise;
-            switch(command.action) {
+            switch(command.command) {
                 case 'upgrade_program':
                     logger.info('Upgrade requested. Will upgrade and attempt program restart. RequestId: [%s]', command.requestId);
                     promise = commandExecutor.upgradeAgent(command.requestId)
