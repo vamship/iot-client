@@ -64,18 +64,15 @@ module.exports = {
         logger.debug('Attaching maintenance event handlers');
         _controller.on(Controller.MAINTENANCE_EVENT, function(command) {
             var promise;
-            var def;
             try {
                 logger.info('Received maintenance event from controller: [%s]. RequestId: [%s]', command.command, command.requestId);
                 switch(command.command) {
                     case 'upgrade_program':
                         logger.info('Upgrade requested. Will upgrade and attempt program restart. RequestId: [%s]', command.requestId);
-                        promise = commandExecutor.upgradeAgent(command.requestId)
-                                    .then(startupHelper.touchRestartMonitor.bind(startupHelper));
+                        promise = commandExecutor.upgradeAgent(command.requestId);
                         break;
                     case 'shutdown_program':
                         logger.info('Shutdown requested. Will automatically attempt program restart. RequestId: [%s]', command.requestId);
-                        promise = startupHelper.touchRestartMonitor();
                         break;
                     case 'reboot_gateway':
                         logger.info('System reboot requested. RequestId: [%s]', command.requestId);
@@ -83,22 +80,21 @@ module.exports = {
                         break;
                     default:
                         logger.warn('Unrecognized maintenance command: [%s]. RequestId: [%s]', command.command, command.requestId);
-                        def = _q.defer();
-                        def.resolve();
-                        promise = def.promise;
                         break;
                 }
             } catch(ex) {
-                var message = _util.format('Error processing maintenance event command: [%s]', command.command, ex);
-                def = _q.defer();
-                logger.error(message);
-                def.reject(message);
-                promise = def.promise;
+                logger.error('Error processing maintenance event command: [%s]', command.command, ex);
             }
 
-            promise.fin(function() {
+            if(!promise) {
                 logger.info('Terminating. RequestId: [%s]', command.requestId);
-            }).done();
+                promise = startupHelper.touchRestartMonitor();
+            } else {
+                promise = promise.then(function() {
+                    logger.info('Terminating. RequestId: [%s]', command.requestId);
+                    startupHelper.touchRestartMonitor()
+                });
+            }
         });
 
         logger.info('Initializing connectors');
