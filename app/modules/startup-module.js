@@ -103,6 +103,7 @@ function processStartupAction(execInfo) {
                             .then(configBuilder.generateHostApConfig.bind(configBuilder, requestId))
                             .then(commandExecutor.enableHostAP.bind(commandExecutor, requestId))
                             .then(commandExecutor.enableDhcp.bind(commandExecutor, requestId))
+                            .then(commandExecutor.upgradeAgent(commandExecutor, requestId))
                             .then(commandExecutor.reboot.bind(commandExecutor, requestId))
                             .then(startupHelper.setStartupAction.bind(
                                             startupHelper, StartupHelper.NO_ACTION, requestId));

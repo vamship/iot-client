@@ -6,7 +6,7 @@ var _childProcess = require('child_process');
 var _q = require('q');
 
 var COMMAND_MAP = {
-    update_gateway: {
+    upgrade_agent: {
         linux: {  command: 'npm', args: [ 'update', '-g', '--unsafe-perm', 'iot-client' ] },
         darwin: { command: 'npm', args: [ 'update', '-g', 'iot-client' ] }
     },
@@ -135,7 +135,7 @@ CommandExecutor.prototype._runCommand = function(command, suppressLogs) {
 CommandExecutor.prototype.upgradeAgent = function(requestId) {
     this._logger.info('Upgrading iot client program. RequestId: [%s]', requestId);
 
-    return this._runCommand('update_gateway').then(function() {
+    return this._runCommand('upgrade_agent').then(function() {
         this._logger.info('Agent upgrade completed successfully. RequestId: [%s]', requestId);
     }.bind(this), function(err) {
         this._logger.error('Agent upgrade failed. RequestId: [%s]', requestId, err);
