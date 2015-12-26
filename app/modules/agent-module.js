@@ -1,6 +1,7 @@
 'use strict';
 /* jshint node:true */
 
+var _util = require('util');
 var _q = require('q');
 
 var _loggerProvider = require('../logger-provider');
@@ -60,32 +61,42 @@ module.exports = {
         }, _loggerProvider);
 
 
-        logger.debug('Attaching admin action event handlers');
+        logger.debug('Attaching maintenance event handlers');
         _controller.on(Controller.MAINTENANCE_EVENT, function(command) {
-            logger.info('Received maintenance event from controller: [%s]. RequestId: [%s]', command.command, command.requestId);
             var promise;
-            switch(command.command) {
-                case 'upgrade_program':
-                    logger.info('Upgrade requested. Will upgrade and attempt program restart. RequestId: [%s]', command.requestId);
-                    promise = commandExecutor.upgradeAgent(command.requestId)
-                                .then(startupHelper.touchRestartMonitor.bind(startupHelper));
-                    break;
-                case 'shutdown_program':
-                    logger.info('Shutdown requested. Will automatically attempt program restart. RequestId: [%s]', command.requestId);
-                    promise = startupHelper.touchRestartMonitor();
-                    break;
-                case 'reboot_gateway':
-                    logger.info('System reboot requested. RequestId: [%s]', command.requestId);
-                    promise = commandExecutor.reboot(requestId);
-                    break;
-                default:
-                    logger.warn('Unrecognized maintenance command: [%s]. RequestId: [%s]', command.command, command.requestId);
-                    var def = _q.defer();
-                    def.resolve();
-                    promise = def.promise;
-                    break;
+            var def;
+            try {
+                logger.info('Received maintenance event from controller: [%s]. RequestId: [%s]', command.command, command.requestId);
+                switch(command.command) {
+                    case 'upgrade_program':
+                        logger.info('Upgrade requested. Will upgrade and attempt program restart. RequestId: [%s]', command.requestId);
+                        promise = commandExecutor.upgradeAgent(command.requestId)
+                                    .then(startupHelper.touchRestartMonitor.bind(startupHelper));
+                        break;
+                    case 'shutdown_program':
+                        logger.info('Shutdown requested. Will automatically attempt program restart. RequestId: [%s]', command.requestId);
+                        promise = startupHelper.touchRestartMonitor();
+                        break;
+                    case 'reboot_gateway':
+                        logger.info('System reboot requested. RequestId: [%s]', command.requestId);
+                        promise = commandExecutor.reboot(command.requestId);
+                        break;
+                    default:
+                        logger.warn('Unrecognized maintenance command: [%s]. RequestId: [%s]', command.command, command.requestId);
+                        def = _q.defer();
+                        def.resolve();
+                        promise = def.promise;
+                        break;
+                }
+            } catch(ex) {
+                var message = _util.format('Error processing maintenance event command: [%s]', command.command, ex);
+                def = _q.defer();
+                logger.error(message);
+                def.reject(message);
+                promise = def.promise;
             }
-            promise.then(function() {
+
+            promise.fin(function() {
                 logger.info('Terminating. RequestId: [%s]', command.requestId);
             }).done();
         });
