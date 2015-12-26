@@ -3,6 +3,7 @@
 
 var _util = require('util');
 var _q = require('q');
+var _package = require('../../package.json');
 
 var Connector = require('iot-client-lib').Connector;
 var CommandExecutor = require('../utils/command-executor');
@@ -153,7 +154,11 @@ CncGatewayConnector.prototype.addData = function(data, requestId) {
                 this._cloudLogger.info([ 'Error disabling local DHCP daemon on boot: [%s]', err ], requestId);
             }.bind(this));
             break;
-        case 'reset_gateway':
+        case 'system_info':
+            this._cloudLogger.info([ 'Gateway agent : [%s]', _package.name ], requestId);
+            this._cloudLogger.info([ 'Gateway agent version: [%s]', _package.version ], requestId);
+            break;
+        case 'reset_agent':
             this._commandExecutor.disableHostAP(requestId).then(function(){
                 this._cloudLogger.info([ 'Local AP daemon disabled on boot' ], requestId);
             }.bind(this), function(err) {

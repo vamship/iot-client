@@ -74,11 +74,12 @@ module.exports = {
                     logger.info('Shutdown requested. Will automatically attempt program restart. RequestId: [%s]', command.requestId);
                     promise = startupHelper.touchRestartMonitor();
                     break;
-                case 'reboot_system':
+                case 'reboot_gateway':
                     logger.info('System reboot requested. RequestId: [%s]', command.requestId);
                     promise = commandExecutor.reboot(requestId);
                     break;
                 default:
+                    logger.warn('Unrecognized maintenance command: [%s]. RequestId: [%s]', command.command, command.requestId);
                     var def = _q.defer();
                     def.resolve();
                     promise = def.promise;
