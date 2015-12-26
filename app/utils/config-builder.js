@@ -211,7 +211,7 @@ ConfigBuilder.prototype.generateGatewayAgentConfig = function(requestId) {
                 cloudConnectors: {}
             };
 
-            var cloudConnectorName = 'cnc-cloud';
+            var cloudConnectorName = 'cnc-cloud-' + this._gatewayId;
             newConfig.cloudConnectors[cloudConnectorName] = {
                 type: 'CncCloud',
                 config: {
@@ -224,7 +224,7 @@ ConfigBuilder.prototype.generateGatewayAgentConfig = function(requestId) {
                 }
             };
 
-            var deviceConnectorName = 'cnc-gateway';
+            var deviceConnectorName = 'cnc-gateway-' + this._gatewayId;
             newConfig.deviceConnectors[deviceConnectorName] = {
                 type: 'CncGateway',
                 config: {}
