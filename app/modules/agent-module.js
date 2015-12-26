@@ -69,10 +69,12 @@ module.exports = {
                 switch(command.command) {
                     case 'upgrade_program':
                         logger.info('Upgrade requested. Will upgrade and attempt program restart. RequestId: [%s]', command.requestId);
-                        promise = commandExecutor.upgradeAgent(command.requestId);
+                        promise = commandExecutor.upgradeAgent(command.requestId)
+                                    .then(StartupHelper.touchRestartMonitor.bind(startupHelper));
                         break;
                     case 'shutdown_program':
                         logger.info('Shutdown requested. Will automatically attempt program restart. RequestId: [%s]', command.requestId);
+                        promise = startupHelper.touchRestartMonitor();
                         break;
                     case 'reboot_gateway':
                         logger.info('System reboot requested. RequestId: [%s]', command.requestId);
@@ -80,21 +82,19 @@ module.exports = {
                         break;
                     default:
                         logger.warn('Unrecognized maintenance command: [%s]. RequestId: [%s]', command.command, command.requestId);
+                        promise = startupHelper.touchRestartMonitor();
                         break;
                 }
             } catch(ex) {
                 logger.error('Error processing maintenance event command: [%s]', command.command, ex);
+                promise = startupHelper.touchRestartMonitor();
             }
 
-            if(!promise) {
-                logger.info('Terminating. RequestId: [%s]', command.requestId);
-                promise = startupHelper.touchRestartMonitor();
-            } else {
-                promise = promise.then(function() {
-                    logger.info('Terminating. RequestId: [%s]', command.requestId);
-                    startupHelper.touchRestartMonitor()
-                });
-            }
+            promise.then(function() {
+                logger.info('Maintenance request completed. RequestId: [%s]', command.requestId);
+            }, function(err) {
+                logger.info('Error processing maintenance request. RequestId: [%s]', command.requestId, err);
+            });
         });
 
         logger.info('Initializing connectors');
