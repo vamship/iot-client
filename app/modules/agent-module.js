@@ -70,7 +70,7 @@ module.exports = {
                     case 'upgrade_program':
                         logger.info('Upgrade requested. Will upgrade and attempt program restart. RequestId: [%s]', command.requestId);
                         promise = commandExecutor.upgradeAgent(command.requestId)
-                                    .then(StartupHelper.touchRestartMonitor.bind(startupHelper));
+                                    .then(startupHelper.touchRestartMonitor.bind(startupHelper));
                         break;
                     case 'shutdown_program':
                         logger.info('Shutdown requested. Will automatically attempt program restart. RequestId: [%s]', command.requestId);
