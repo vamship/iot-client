@@ -3,6 +3,7 @@
 
 var _util = require('util');
 var _q = require('q');
+var _wiringPi = require('wiring-pi');
 
 var _loggerProvider = require('../logger-provider');
 var StartupHelper = require('../utils/startup-helper');
@@ -54,6 +55,9 @@ module.exports = {
             def.resolve('Skipping processing');
             return def.promise;
         }
+
+        logger.debug('Initializing wiring pi');
+        _wiringPi.wiringPiSetup();
 
         logger.debug('Creating controller');
         _controller = new Controller({

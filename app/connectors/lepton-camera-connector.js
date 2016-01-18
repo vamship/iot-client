@@ -4,11 +4,13 @@
 var _spi = require('spi');
 var _util = require('util');
 var _q = require('q');
+var _wiringPi = require('wiring-pi');
 var PollingConnector = require('iot-client-lib').PollingConnector;
 
 var PACKET_SIZE = 164;
 var PACKETS_PER_FRAME = 60;
 var DEFAULT_MAX_RETRIES = 750;
+var DEFAULT_CAMERA_RESET_PIN = 23; //wiring pi pin number
 
 /**
  * Connector that interfaces with a the lepton camera over a combination of
@@ -25,6 +27,25 @@ function LeptonCameraConnector(id) {
 }
 
 _util.inherits(LeptonCameraConnector, PollingConnector);
+
+/**
+ * Resets the camera.
+ * @class LeptonCameraConnector
+ * @method _start
+ * @private
+ */
+LeptonCameraConnector.prototype._resetCamera = function() {
+    var camera = this._camera;
+    this._camera = null;
+
+    this._logger.info('Starting camera reset');
+    _wiringPi.digitalWrite(this._config.cameraResetPin, 0);
+    setTimeout(function() {
+        this._logger.info('Camera reset complete');
+        _wiringPi.digitalWrite(this._config.cameraResetPin, 1);
+        this._camera = camera;
+    }.bind(this), 100);
+};
 
 /**
  * @class LeptonCameraConnector
@@ -51,11 +72,18 @@ LeptonCameraConnector.prototype._start = function() {
         this._config.maxRetries <= 0) {
         this._config.maxRetries = DEFAULT_MAX_RETRIES;
     }
+    if(typeof this._config.cameraResetPin !== 'number' ||
+        this._config.cameraResetPin <= 0) {
+        this._config.cameraResetPin = DEFAULT_CAMERA_RESET_PIN;
+    }
 
     try {
         this._stop().fin(function() {
-            // NOTE: This is a synchronous (blocking) call.
+            this._logger.info('Initializing camera reset pin: [%s]', this._config.cameraResetPin);
+            _wiringPi.pinMode(this._config.cameraResetPin, _wiringPi.OUTPUT);
+
             this._logger.info('Initializing SPI: [%s]', this._config.spiDevice);
+            // NOTE: This is a synchronous (blocking) call.
             this._camera = new _spi.Spi(this._config.spiDevice, {
                 mode: _spi.MODE.MODE_3,
                 size: 8,
@@ -193,7 +221,6 @@ LeptonCameraConnector.prototype._process = function() {
             };
 
             this._logger.info('Emitting sensor data for node');
-            this._logger.debug('Sensor data: ', payload);
             this.emit('data', payload);
         } else {
             this._logger.warn('Error reading frame from camera. No data to send');
