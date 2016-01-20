@@ -54,7 +54,8 @@
                 "pollFrequency": 5000,
                 "spiDevice": "/dev/spidev0.1",
                 "i2cDevice": "/dev/i2c-1",
-                "maxRetries": 600
+                "maxRetries": 600,
+                "cameraResetPin": 23
             }
         },
 
