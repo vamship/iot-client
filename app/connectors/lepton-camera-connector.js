@@ -81,6 +81,7 @@ LeptonCameraConnector.prototype._start = function() {
         this._stop().fin(function() {
             this._logger.info('Initializing camera reset pin: [%s]', this._config.cameraResetPin);
             _wiringPi.pinMode(this._config.cameraResetPin, _wiringPi.OUTPUT);
+            _wiringPi.digitalWrite(this._config.cameraResetPin, 1);
 
             this._logger.info('Initializing SPI: [%s]', this._config.spiDevice);
             // NOTE: This is a synchronous (blocking) call.
@@ -224,6 +225,7 @@ LeptonCameraConnector.prototype._process = function() {
             this.emit('data', payload);
         } else {
             this._logger.warn('Error reading frame from camera. No data to send');
+            this._resetCamera();
         }
     } else {
         this._logger.warn('Camera not initialized and ready');
