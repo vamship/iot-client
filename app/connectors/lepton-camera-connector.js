@@ -44,7 +44,7 @@ LeptonCameraConnector.prototype._resetCamera = function() {
         this._logger.info('Camera reset complete');
         _wiringPi.digitalWrite(this._config.cameraResetPin, 1);
         this._camera = camera;
-    }.bind(this), 100);
+    }.bind(this), 500);
 };
 
 /**
