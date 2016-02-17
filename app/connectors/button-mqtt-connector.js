@@ -30,7 +30,7 @@ ButtonMqttConnector.prototype._processBrokerMessage = function(topic, message) {
     }
 
     var tokens = topic.split('/');
-    if(tokens.length < 2) {
+    if(tokens.length < 3) {
         this._logger.warn('Message topic did not have sufficient tokens: [%s]', topic);
         return;
     }
