@@ -2,6 +2,7 @@
 'use strict';
 
 var _os = require('os');
+var _macaddress = require('macaddress');
 var _fs = require('fs');
 var _path = require('path');
 var _util = require('util');
@@ -32,16 +33,8 @@ function ConfigBuilder(logger) {
     }
     this._logger = logger;
     this._platform = _os.platform();
-    var ifaceInfo = _os.networkInterfaces()[GLOBAL.config.cfg_outbound_network_interface];
+    this._gatewayId = null;
     var message = '';
-    if(!ifaceInfo) {
-        message = _util.format('Outbound network interface [%s] does not exist',
-                                            GLOBAL.config.cfg_outbound_network_interface);
-        this._logger.error(message);
-        throw new Error(message);
-    }
-
-    this._gatewayId = ifaceInfo[0].mac.replace(/:/g, '').toUpperCase();
     this._localNetworkGatewayIP = GLOBAL.config.cfg_local_network_gateway;
     if(typeof this._localNetworkGatewayIP !== 'string' || this._localNetworkGatewayIP.length <= 0) {
         message = _util.format('Invalid local network gateway address specified: [%s]', 
@@ -49,6 +42,36 @@ function ConfigBuilder(logger) {
         this._logger.error(message);
         throw new Error(message);
     }
+};
+
+/**
+ * @class ConfigBuilder
+ * @method _getGatewayId
+ * @private
+ */
+ConfigBuilder.prototype._getGatewayId = function() {
+    var def = _q.defer();
+    if(this._gatewayId) {
+        def.resolve(this._gatewayId);
+    } else {
+        _macAddress.one(GLOBAL.config.cfg_outbound_network_interface, function(err, mac) {
+            if(err) {
+                var message = _util.format('Unable to get mac address of outbound network interface: [%s]',
+                                                    GLOBAL.config.cfg_outbound_network_interface);
+                this._logger.error(message);
+                def.reject(message);
+                return;
+            }
+            try {
+                this._gatewayId = mac.replace(/:/g, '').toUpperCase();
+                def.resolve(this._gatewayId);
+            } catch(ex) {
+                this._logger.error(ex);
+                def.reject(ex);
+            }
+        }.bind(this));
+    }
+    return def.promise;
 };
 
 /**
@@ -168,23 +191,24 @@ ConfigBuilder.prototype._writeConfig = function(target, data) {
 ConfigBuilder.prototype.generateHostApConfig = function(requestId) {
     this._logger.debug('Generating host ap configuration. RequestId: [%s]', requestId);
 
-    var config = [
-        'interface=wlan0',
-        '',
-        'ssid=' + this._gatewayId,
-        'wpa_passphrase=' + this._gatewayId.toLowerCase(),
-        'channel=6',
-        '',
-        'wmm_enabled=1',
-        'wpa=1',
-        'wpa_key_mgmt=WPA-PSK',
-        'wpa_pairwise=TKIP',
-        'rsn_pairwise=CCMP',
-        'macaddr_acl=0',
-        'auth_algs=1',
-    ];
-
-    return this._writeConfig('hostapd_conf', config.join('\n')).then(function() {
+    return this._getGatewayId().then(function(gatewayId) {
+       var config = [
+            'interface=wlan0',
+            '',
+            'ssid=' + gatewayId,
+            'wpa_passphrase=' + gatewayId.toLowerCase(),
+            'channel=6',
+            '',
+            'wmm_enabled=1',
+            'wpa=1',
+            'wpa_key_mgmt=WPA-PSK',
+            'wpa_pairwise=TKIP',
+            'rsn_pairwise=CCMP',
+            'macaddr_acl=0',
+            'auth_algs=1',
+        ];
+        return this._writeConfig('hostapd_conf', config.join('\n'));
+    }.bind(this)).then(function() {
         this._logger.info('Host AP configuration updated successfully. RequestId: [%s]', requestId);
     }.bind(this), function(err) {
         this._logger.error('Error updating host ap configuration. RequestId: [%s]', requestId, err);
@@ -203,15 +227,20 @@ ConfigBuilder.prototype.generateHostApConfig = function(requestId) {
  */
 ConfigBuilder.prototype.generateGatewayAgentConfig = function(requestId) {
     this._logger.debug('Generating gateway agent configuration. RequestId: [%s]', requestId);
-    return this._readExistingConfig(GLOBAL.config.cfg_baseline_config_file, true)
-        .then(function(config) {
+    var gatewayId = null;
+
+    return this._getGatewayId()
+        .then(function(id) {
+            gatewayId = id;
+            return this._readExistingConfig(GLOBAL.config.cfg_baseline_config_file, true)
+        }.bind(this)).then(function(config) {
             var newConfig = {
                 connectorTypes: config.connectorTypes,
                 deviceConnectors: {},
                 cloudConnectors: {}
             };
 
-            var cloudConnectorName = this._gatewayId + '-cnc-cloud';
+            var cloudConnectorName = gatewayId + '-cnc-cloud';
             newConfig.cloudConnectors[cloudConnectorName] = {
                 type: 'CncCloud',
                 config: {
@@ -219,12 +248,12 @@ ConfigBuilder.prototype.generateGatewayAgentConfig = function(requestId) {
                     port: 1883,
                     protocol: 'mqtt',
                     networkInterface: GLOBAL.config.cfg_local_network_interface,
-                    gatewayname: this._gatewayId,
+                    gatewayname: gatewayId,
                     topics: ''
                 }
             };
 
-            var deviceConnectorName = this._gatewayId + '-cnc-gateway';
+            var deviceConnectorName = gatewayId + '-cnc-gateway';
             newConfig.deviceConnectors[deviceConnectorName] = {
                 type: 'CncGateway',
                 config: {}
