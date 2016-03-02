@@ -40,7 +40,7 @@
                 "pollFrequency": 10000,
                 "url": "https://api-iot.analoggarage.com",
                 "headers": {
-                    "apiKey": "witchcraft",
+                    "authorization": "gateway1|__hash__key__",
                     "content-type": "application/json"
                 }
             }
