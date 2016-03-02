@@ -54,7 +54,7 @@ ConfigBuilder.prototype._getGatewayId = function() {
     if(this._gatewayId) {
         def.resolve(this._gatewayId);
     } else {
-        _macAddress.one(GLOBAL.config.cfg_outbound_network_interface, function(err, mac) {
+        _macaddress.one(GLOBAL.config.cfg_outbound_network_interface, function(err, mac) {
             if(err) {
                 var message = _util.format('Unable to get mac address of outbound network interface: [%s]',
                                                     GLOBAL.config.cfg_outbound_network_interface);
