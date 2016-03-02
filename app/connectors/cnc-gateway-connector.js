@@ -7,6 +7,7 @@ var _package = require('../../package.json');
 
 var Connector = require('iot-client-lib').Connector;
 var CommandExecutor = require('../utils/command-executor');
+var Pm2Helper = require('../utils/pm2-helper');
 var StartupHelper = require('../utils/startup-helper');
 
 var DEFAULT_REQUEST_ID = 'na';
@@ -23,6 +24,7 @@ function CncGatewayConnector(id) {
     CncGatewayConnector.super_.call(this, id)
     this._commandExecutor = null;
     this._startupHelper = null;
+    this._pm2Helper = null;
     this._cloudLogger = this._createCloudLogger();
 }
 
@@ -61,11 +63,12 @@ CncGatewayConnector.prototype._createCloudLogger = function() {
 CncGatewayConnector.prototype._start = function() {
     this._logger.info('Initializing connector');
 
-    // TODO: Review this is the correct place to do the
+    // TODO: Review if this is the correct place to do the
     // initialization.
     if(!this._commandExecutor) {
         this._commandExecutor = new CommandExecutor(this._logger);
         this._startupHelper = new StartupHelper(this._logger);
+        this._pm2Helper = new Pm2Helper(this._logger);
     }
     var def = _q.defer();
     def.resolve();
@@ -173,6 +176,20 @@ CncGatewayConnector.prototype.addData = function(data, requestId) {
                 this._cloudLogger.info([ 'Enabled provision mode on boot' ], requestId);
             }.bind(this), function(err) {
                 this._cloudLogger.info([ 'Error enabling provision mode on boot' ], requestId);
+            }.bind(this));
+            break;
+        case 'start_mqtt':
+            this._pm2Helper.startMqtt(requestId).then(function() {
+                this._cloudLogger.info([ 'Local MQTT broker started' ], requestId);
+            }.bind(this), function(err) {
+                this._cloudLogger.info([ 'Error starting local MQTT broker: [%s]', err ], requestId);
+            }.bind(this));
+            break;
+        case 'stop_mqtt':
+            this._pm2Helper.stopMqtt(requestId).then(function() {
+                this._cloudLogger.info([ 'Local MQTT broker stopped' ], requestId);
+            }.bind(this), function(err) {
+                this._cloudLogger.info([ 'Error stopping local MQTT broker: [%s]', err ], requestId);
             }.bind(this));
             break;
         default:

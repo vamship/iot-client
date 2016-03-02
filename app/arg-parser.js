@@ -106,6 +106,7 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                     .argv;
 
 GLOBAL.config = {};
+GLOBAL.config.cfg_program_root = __dirname;
 GLOBAL.config.cfg_config_dir = args.configDir;
 GLOBAL.config.cfg_config_file = _path.resolve(_path.join(args.configDir, 'config.json'));
 GLOBAL.config.cfg_startup_file = _path.resolve(_path.join(args.configDir, 'startup.json'));

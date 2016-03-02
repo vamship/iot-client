@@ -1,0 +1,14 @@
+{
+    "apps": [ {
+        "name": "iotclient",
+        "script": "iotclient",
+        "args": [ "--config-dir=/root/apps/iotclient",
+                  "--no-log-file",
+                  "--log-level=info" ],
+        "watch": [ "/root/apps/iotclient/watch" ],
+        "cwd": "/root",
+        "env": {
+            "NODE_ENV": "production"
+        }
+    } ]
+}
