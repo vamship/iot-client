@@ -90,7 +90,7 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                         describe: 'When specified, does not write any logging statements ' +
                                     'to the console (stderr). It may make sense to use this ' +
                                     'option if the client is being executed as a daemon, ' +
-                                    'without captureing stdout/stderr.\r\n'
+                                    'without capturing stdout/stderr.\r\n'
                     })
                     .option('no-log-file', {
                         demand: false,
