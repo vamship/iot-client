@@ -3,7 +3,6 @@
 
 var _util = require('util');
 var MqttConnector = require('./mqtt-connector');
-var DEFAULT_USERNAME = 'user';
 
 /**
  * Connector that uses MQTT to communicate with the cloud for command and
@@ -21,12 +20,30 @@ _util.inherits(CncCloudConnector, MqttConnector);
 
 /**
  * @class CncCloudConnector
+ * @method _validate
+ * @protected
+ */
+CncCloudConnector.prototype._validate = function() {
+    if (typeof this._config.account !== 'string' ||
+               this._config.account.length <= 0) {
+        return 'Connector configuration does not define a valid account name';
+    }
+    return CncCloudConnector.super_.prototype._validate.call(this);
+};
+
+/**
+ * @class CncCloudConnector
  * @method _start
  * @protected
  */
 CncCloudConnector.prototype._start = function() {
-    var username = this._config.username || DEFAULT_USERNAME;
-    this._topicPrefix = ['', username, this._config.gatewayname, '' ].join('/');
+    var account = this._config.account;
+    if(typeof account !== 'string' || account.length <= 0 ) {
+        //This error will be caught during the validation routine of the super class.
+        this._logger.error('Invalid account specified: [%s]', account);
+        account = '';
+    }
+    this._topicPrefix = ['', account, this._config.gatewayname, '' ].join('/');
     this._config.topics = 'cloud' + this._topicPrefix + '+';
     return CncCloudConnector.super_.prototype._start.call(this);
 }
@@ -86,7 +103,7 @@ CncCloudConnector.prototype.addLogData = function(data) {
         return;
     }
     var requestId = data.requestId || 'na';
-    var message = data.message || '';
+    var message = JSON.stringify(data.data);
     var qos = 0;
     var topic = 'gateway' + this._topicPrefix + requestId;
     this._publish(topic, message, qos);
