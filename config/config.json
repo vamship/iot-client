@@ -18,7 +18,6 @@
                 "protocol": "mqtts",
                 "networkInterface": "en0",
                 "gatewayname": "testgw",
-                "username": "",
                 "password": "",
                 "topics": ""
             }
