@@ -43,6 +43,7 @@ CncCloudConnector.prototype._start = function() {
         this._logger.error('Invalid account specified: [%s]', account);
         account = '';
     }
+    this._config.username = this._config.gatewayname;
     this._topicPrefix = ['', account, this._config.gatewayname, '' ].join('/');
     this._config.topics = 'cloud' + this._topicPrefix + '+';
     return CncCloudConnector.super_.prototype._start.call(this);
