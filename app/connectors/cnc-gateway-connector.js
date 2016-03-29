@@ -23,35 +23,33 @@ function CncGatewayConnector(id) {
     CncGatewayConnector.super_.call(this, id)
     this._commandExecutor = null;
     this._startupHelper = null;
-    this._cloudLogger = this._createCloudLogger();
+    this._mockRequest = this._createMockRequest();
 }
 
 _util.inherits(CncGatewayConnector, Connector);
 
 /**
  * @class CncGatewayConnector
- * @method _createCloudLogger
+ * @method _createMockRequest
  * @private
  */
-CncGatewayConnector.prototype._createCloudLogger = function() {
-    var logger = {};
-    [ 'info', 'warn', 'error' ].forEach(function(methodName) {
-        logger[methodName] = function(message, requestId) {
-            if(message instanceof Array) {
-                message = _util.format.apply(_util, message);
-            }
-            var payload = {
-                requestId: requestId || 'na',
-                qos: (methodName === 'info')? 0:1,
-                message: '[' + methodName + '] [' + requestId + '] ' + message.toString()
-            }
-            this.emit(CncGatewayConnector.super_.LOG_EVENT, payload);
+CncGatewayConnector.prototype._createMockRequest = function() {
+    var request = {
+        id: 'na'
+    };
+    [ 'logInfo',
+        'logWarn',
+        'logError',
+        'acknowledge',
+        'completeOk',
+        'completeError' ].forEach(function(methodName) {
+
+        request[methodName] = function(message, requestId) {
         }.bind(this);
     }.bind(this));
 
-    return logger;
+    return request;
 };
-
 
 /**
  * @class CncGatewayConnector
@@ -101,15 +99,16 @@ CncGatewayConnector.prototype.addLogData = function(data) {
  * @class CncGatewayConnector
  * @method addData
  * @param {Object} data The data obtained from the cloud
- * @param {String} [requestId] An optional request id that can be used for logging.
+ * @param {String} [request] An optional request that represents the request
+ *                  from the cloud.
  */
-CncGatewayConnector.prototype.addData = function(data, requestId) {
-    requestId = requestId || DEFAULT_REQUEST_ID;
+CncGatewayConnector.prototype.addData = function(data, request) {
+    request = request || this._mockRequest;
     var message = '';
     if(typeof data !== 'string' || data.length <= 0) {
         message = _util.format('Invalid data payload received: [%s]', data);
         this._logger.error(message);
-        this._cloudLogger.error(message, requestId);
+        request.completeError(message);
         return;
     }
     try {
@@ -117,13 +116,13 @@ CncGatewayConnector.prototype.addData = function(data, requestId) {
     } catch(ex) {
         message = _util.format('Error parsing data payload', ex);
         this._logger.error(message);
-        this._cloudLogger.error(message, requestId);
+        request.completeError(message);
         return;
     }
     if(typeof data.command !== 'string') {
         message = _util.format('Data does not define a valid command: [%s]', data.command);
         this._logger.error(message);
-        this._cloudLogger.error(message, requestId);
+        request.completeError(message);
         return;
     }
 
@@ -131,53 +130,44 @@ CncGatewayConnector.prototype.addData = function(data, requestId) {
     this._logger.debug('Processing command from cloud: [%s]', data.command);
     switch(command) {
         case 'enable_local_network':
-            this._commandExecutor.enableHostAP(requestId).then(function(){
-                this._cloudLogger.info([ 'Local AP daemon enabled on boot' ], requestId);
-            }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error enabling local AP daemon on boot: [%s]', err ], requestId);
-            }.bind(this));
-            this._commandExecutor.enableDhcp(requestId).then(function(){
-                this._cloudLogger.info([ 'Local DHCP daemon enabled on boot' ], requestId);
-            }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error enabling local DHCP daemon on boot: [%s]', err ], requestId);
-            }.bind(this));
+            this._commandExecutor.enableHostAP(request.id)
+                .then(this._commandExecutor.enableDhcp.bind(this._commandExecutor, request.id))
+                .then(function() {
+                    request.logInfo('Local wifi network enabled on boot');
+                    request.completeOk();
+                }, function(err) {
+                    request.completeError('Error enabling local wifi network on boot: [%s]', err);
+                });
             break;
         case 'disable_local_network':
-            this._commandExecutor.disableHostAP(requestId).then(function(){
-                this._cloudLogger.info([ 'Local AP daemon disabled on boot' ], requestId);
-            }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error disabling local AP daemon on boot: [%s]', err ], requestId);
-            }.bind(this));
-            this._commandExecutor.disableDhcp(requestId).then(function(){
-                this._cloudLogger.info([ 'Local DHCP daemon disabled on boot' ], requestId);
-            }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error disabling local DHCP daemon on boot: [%s]', err ], requestId);
-            }.bind(this));
+            this._commandExecutor.disableHostAP(request.id)
+                .then(this._commandExecutor.disableDhcp.bind(this._commandExecutor, request.id))
+                .then(function() {
+                    request.logInfo('Local wifi network disabled on boot');
+                    request.completeOk();
+                }, function(err) {
+                    request.completeError('Error disabling local wifi network on boot: [%s]', err);
+                });
             break;
         case 'system_info':
-            this._cloudLogger.info([ 'Gateway agent : [%s]', _package.name ], requestId);
-            this._cloudLogger.info([ 'Gateway agent version: [%s]', _package.version ], requestId);
+            request.completeOk({
+                name: _package.name,
+                version: _package.version
+            });
             break;
         case 'reset_agent':
-            this._commandExecutor.disableHostAP(requestId).then(function(){
-                this._cloudLogger.info([ 'Local AP daemon disabled on boot' ], requestId);
-            }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error disabling local AP daemon on boot: [%s]', err ], requestId);
-            }.bind(this));
-            this._commandExecutor.disableDhcp(requestId).then(function(){
-                this._cloudLogger.info([ 'Local DHCP daemon disabled on boot' ], requestId);
-            }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error disabling local DHCP daemon on boot: [%s]', err ], requestId);
-            }.bind(this));
-            this._startupHelper.setStartupAction(StartupHelper.PROVISION_MODE, requestId).then(function() {
-                this._cloudLogger.info([ 'Enabled provision mode on boot' ], requestId);
-            }.bind(this), function(err) {
-                this._cloudLogger.info([ 'Error enabling provision mode on boot' ], requestId);
-            }.bind(this));
+            this._commandExecutor.disableHostAP(request.id)
+                .then(this._commandExecutor.disableDhcp.bind(this._commandExecutor, request.id))
+                .then(this._startupHelper.setStartupAction.bind(this._startupHelper, StartupHelper.PROVISION_MODE, request.id))
+                .then(function() {
+                    request.logInfo('Gateway will start in provisioning mode on boot');
+                    request.completeOk();
+                }, function(err) {
+                    request.completeError('Error enabling provisioning mode on boot: [%s]', err);
+                });
             break;
         default:
-            this._logger.warn('Unrecognized command: [%s]', data.command);
-            this._cloudLogger.warn([ 'Unrecognized command: [%s]', data.command ], requestId);
+            request.completeError('Unrecognized command: [%s]', data.command);
             break;
     }
 };
