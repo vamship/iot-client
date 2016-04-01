@@ -105,16 +105,8 @@ CncGatewayConnector.prototype.addLogData = function(data) {
 CncGatewayConnector.prototype.addData = function(data, request) {
     request = request || this._mockRequest;
     var message = '';
-    if(typeof data !== 'string' || data.length <= 0) {
+    if(!data || typeof data !== 'object') {
         message = _util.format('Invalid data payload received: [%s]', data);
-        this._logger.error(message);
-        request.completeError(message);
-        return;
-    }
-    try {
-        data = JSON.parse(data);
-    } catch(ex) {
-        message = _util.format('Error parsing data payload', ex);
         this._logger.error(message);
         request.completeError(message);
         return;
