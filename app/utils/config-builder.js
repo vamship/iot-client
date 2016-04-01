@@ -247,6 +247,7 @@ ConfigBuilder.prototype.generateGatewayAgentConfig = function(requestId) {
                     host: this._localNetworkGatewayIP,
                     port: 1883,
                     protocol: 'mqtt',
+                    account: gatewayId,
                     networkInterface: GLOBAL.config.cfg_local_network_interface,
                     gatewayname: gatewayId,
                     topics: ''
