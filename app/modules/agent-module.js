@@ -3,7 +3,7 @@
 
 var _util = require('util');
 var _q = require('q');
-var _wiringPi = require('wiring-pi');
+var _wiringPi = require('../utils/wiring-pi-wrapper');
 
 var _loggerProvider = require('../logger-provider');
 var StartupHelper = require('../utils/startup-helper');

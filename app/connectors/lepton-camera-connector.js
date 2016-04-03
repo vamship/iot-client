@@ -4,7 +4,7 @@
 var _spi = require('spi');
 var _util = require('util');
 var _q = require('q');
-var _wiringPi = require('wiring-pi');
+var _wiringPi = require('../utils/wiring-pi-wrapper');
 var PollingConnector = require('iot-client-lib').PollingConnector;
 
 var PACKET_SIZE = 164;

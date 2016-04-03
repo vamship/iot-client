@@ -100,6 +100,14 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                                     'to log files. Useful in environments where disk space ' +
                                     'is limited.\r\n'
                     })
+                    .option('mock-wiring-pi', {
+                        demand: false,
+                        default: false,
+                        type: 'boolean',
+                        describe: 'When specified, uses a mock version of the wiring pi ' +
+                                    'library. Useful in environment where wiring pi is ' +
+                                    'not available.\r\n'
+                    })
                     .help('help')
                     .alias('help', 'h')
                     .describe('help', 'Show application usage help')
@@ -123,6 +131,8 @@ GLOBAL.config.cfg_baseline_config_file = args.baselineConfigFile;
 GLOBAL.config.cfg_outbound_network_interface = args.outboundNetworkInterface;
 GLOBAL.config.cfg_local_network_interface = args.localNetworkInterface;
 GLOBAL.config.cfg_local_network_gateway = args.localNetworkGateway;
+
+GLOBAL.config.cfg_mock_wiring_pi = args.mockWiringPi;
 
 //NOTE: Logger must be initialized *after* global configuration has been set.
 var _loggerProvider = require('./logger-provider');
