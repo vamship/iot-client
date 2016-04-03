@@ -7,6 +7,7 @@ var _package = require('../../package.json');
 
 var Connector = require('iot-client-lib').Connector;
 var CommandExecutor = require('../utils/command-executor');
+var Pm2Helper = require('../utils/pm2-helper');
 var StartupHelper = require('../utils/startup-helper');
 
 var DEFAULT_REQUEST_ID = 'na';
@@ -24,6 +25,7 @@ function CncGatewayConnector(id) {
     this._commandExecutor = null;
     this._startupHelper = null;
     this._mockRequest = this._createMockRequest();
+    this._pm2Helper = null;
 }
 
 _util.inherits(CncGatewayConnector, Connector);
@@ -59,11 +61,12 @@ CncGatewayConnector.prototype._createMockRequest = function() {
 CncGatewayConnector.prototype._start = function() {
     this._logger.info('Initializing connector');
 
-    // TODO: Review this is the correct place to do the
+    // TODO: Review if this is the correct place to do the
     // initialization.
     if(!this._commandExecutor) {
         this._commandExecutor = new CommandExecutor(this._logger);
         this._startupHelper = new StartupHelper(this._logger);
+        this._pm2Helper = new Pm2Helper(this._logger);
     }
     var def = _q.defer();
     def.resolve();
@@ -157,6 +160,20 @@ CncGatewayConnector.prototype.addData = function(data, request) {
                 }, function(err) {
                     request.completeError('Error enabling provisioning mode on boot: [%s]', err);
                 });
+            break;
+        case 'start_mqtt':
+            this._pm2Helper.startMqtt(requestId).then(function() {
+                request.logInfo('Local MQTT broker started');
+            }.bind(this), function(err) {
+                request.logInfo('Error starting local MQTT broker: [%s]', err);
+            }.bind(this));
+            break;
+        case 'stop_mqtt':
+            this._pm2Helper.stopMqtt(requestId).then(function() {
+                request.logInfo('Local MQTT broker stopped');
+            }.bind(this), function(err) {
+                request.logInfo('Error stopping local MQTT broker: [%s]', err);
+            }.bind(this));
             break;
         default:
             request.completeError('Unrecognized command: [%s]', data.command);

@@ -1,6 +1,7 @@
 /* jshint node:true */
 'use strict';
 
+var _util = require('util');
 var _os = require('os');
 var _childProcess = require('child_process');
 var _q = require('q');
@@ -130,7 +131,7 @@ CommandExecutor.prototype._runCommand = function(command, suppressLogs) {
  * @method upgradeAgent
  * @param {String} [requestId] An optional request id
  * @return {Object} A promise that will be rejected or resolved based on 
- *          the write operation.
+ *          the operation.
  */
 CommandExecutor.prototype.upgradeAgent = function(requestId) {
     this._logger.info('Upgrading iot client program. RequestId: [%s]', requestId);
@@ -150,7 +151,7 @@ CommandExecutor.prototype.upgradeAgent = function(requestId) {
  * @method reboot
  * @param {String} [requestId] An optional request id
  * @return {Object} A promise that will be rejected or resolved based on 
- *          the write operation.
+ *          the operation.
  */
 CommandExecutor.prototype.reboot = function(requestId) {
     this._logger.info('Rebooting current system. RequestId: [%s]', requestId);
@@ -170,7 +171,7 @@ CommandExecutor.prototype.reboot = function(requestId) {
  * @method enableHostAP
  * @param {String} [requestId] An optional request id
  * @return {Object} A promise that will be rejected or resolved based on 
- *          the write operation.
+ *          the operation.
  */
 CommandExecutor.prototype.enableHostAP = function(requestId) {
     this._logger.info('Enabling auto start of host ap daemon. RequestId: [%s]', requestId);
@@ -190,7 +191,7 @@ CommandExecutor.prototype.enableHostAP = function(requestId) {
  * @method disableHostAP
  * @param {String} [requestId] An optional request id
  * @return {Object} A promise that will be rejected or resolved based on 
- *          the write operation.
+ *          the operation.
  */
 CommandExecutor.prototype.disableHostAP = function(requestId) {
     this._logger.info('Disabling auto start of host ap daemon. RequestId: [%s]', requestId);
@@ -210,7 +211,7 @@ CommandExecutor.prototype.disableHostAP = function(requestId) {
  * @method enableDhcp
  * @param {String} [requestId] An optional request id
  * @return {Object} A promise that will be rejected or resolved based on 
- *          the write operation.
+ *          the operation.
  */
 CommandExecutor.prototype.enableDhcp = function(requestId) {
     this._logger.info('Enabling auto start of dhcp daemon. RequestId: [%s]', requestId);
@@ -230,7 +231,7 @@ CommandExecutor.prototype.enableDhcp = function(requestId) {
  * @method disableDhcp
  * @param {String} [requestId] An optional request id
  * @return {Object} A promise that will be rejected or resolved based on 
- *          the write operation.
+ *          the operation.
  */
 CommandExecutor.prototype.disableDhcp = function(requestId) {
     this._logger.info('Disabling auto start of dhcp daemon. RequestId: [%s]', requestId);

@@ -1,0 +1,11 @@
+{
+    "apps": [ {
+        "name": "mosca",
+        "script": "mosca",
+        "args": [ "--config=/root/apps/mosca/config.js" ],
+        "cwd": "/root",
+        "env": {
+            "NODE_ENV": "production"
+        }
+    } ]
+}

@@ -3,7 +3,7 @@
         "name": "iotclient",
         "script": "app/index.js",
         "args": [ "--config-dir=.tmp",
-                  "--no-log-file",
+                  "--disable-file-logging",
                   "--log-level=silly" ],
         "watch": [ "/root/code/iot-client/.tmp/watch" ],
         "cwd": "/root/code/iot-client",

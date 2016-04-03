@@ -90,7 +90,7 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                         describe: 'When specified, does not write any logging statements ' +
                                     'to the console (stderr). It may make sense to use this ' +
                                     'option if the client is being executed as a daemon, ' +
-                                    'without captureing stdout/stderr.\r\n'
+                                    'without capturing stdout/stderr.\r\n'
                     })
                     .option('disable-file-logging', {
                         demand: false,
@@ -114,6 +114,7 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                     .argv;
 
 GLOBAL.config = {};
+GLOBAL.config.cfg_program_root = __dirname;
 GLOBAL.config.cfg_config_dir = args.configDir;
 GLOBAL.config.cfg_config_file = _path.resolve(_path.join(args.configDir, 'config.json'));
 GLOBAL.config.cfg_startup_file = _path.resolve(_path.join(args.configDir, 'startup.json'));
