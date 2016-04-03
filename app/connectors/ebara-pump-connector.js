@@ -20,9 +20,7 @@ var EbaraPumpParser = require('./io/ebara-pump-parser');
 function VacuumPumpConnector(id) {
     VacuumPumpConnector.super_.call(this, id)
 
-    // <ESC> 'A' 'A' 'N' 'E', ',' '3' '0' <CR> <LF>
-    this._connectMessage = new Buffer([ 27, 65, 65, 78, 69, 44, 51, 48, 13, 10 ]);
-    this._ebaraPump = new EbaraPumpParser(id);
+    this._pumpParser = new EbaraPumpParser(id);
     this._requestPending = false;
     this._requestResetHandle = null;
     this._requestTimeout = 60 * 60 * 1000;
@@ -52,16 +50,11 @@ VacuumPumpConnector.prototype._getResolver = function(def, operation) {
  * @method _dataHandler
  * @private
  */
-VacuumPumpConnector.prototype._dataHandler = function(data) {
-    if(!data || typeof data !== 'object') {
-        this._logger.error('Invalid data received from serial port. Expected object, got: [%s]', (typeof data));
+VacuumPumpConnector.prototype._dataHandler = function(payload) {
+    if(!payload || typeof payload !== 'object') {
+        this._logger.error('Invalid payload received from serial port. Expected object, got: [%s]', (typeof payload));
         return;
     }
-
-    var payload = {
-        id: this._id,
-        data: data
-    };
 
     this._logger.info('Emitting sensor data for node');
     this._logger.debug('Sensor data: ', payload);
@@ -83,7 +76,7 @@ VacuumPumpConnector.prototype._dataHandler = function(data) {
  */
 VacuumPumpConnector.prototype._errorHandler = function(err) {
     this._logger.error('Error occurred when communicating on the port: ', err);
-    this._ebaraPump.reset();
+    this._pumpParser.reset();
 };
 
 /**
@@ -101,7 +94,7 @@ VacuumPumpConnector.prototype._start = function() {
         stopbits: this._config.stopBits,
         databits: this._config.dataBits,
         flowControl: this._config.flowControl,
-        parser: this._ebaraPump.getParser()
+        parser: this._pumpParser.getParser()
     }, false);
 
     if(typeof this._config.pumpRequestTimeout !== 'number' ||
@@ -166,7 +159,7 @@ VacuumPumpConnector.prototype._process = function() {
             this._logger.info('Waiting for response from previous request. No new request will be dispatched');
             return;
         }
-        this._port.write(this._connectMessage, function(err, data) {
+        this._port.write(this._pumpParser.connectMessage, function(err, data) {
             if(err) {
                 this._logger.error('Error writing data on port: [%s]. Details: ', this._config.portName, err);
             } else {
