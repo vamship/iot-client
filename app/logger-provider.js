@@ -9,7 +9,7 @@ function _buildTransports(label) {
     var transports = [];
 
     //Optionally add the console transport
-    if(!GLOBAL.config.cfg_no_log_console) {
+    if(!GLOBAL.config.cfg_disable_console_logging) {
         transports.push(new _winston.transports.Console({
             level: GLOBAL.config.cfg_log_level,
             colorize: true,
@@ -20,7 +20,7 @@ function _buildTransports(label) {
     }
 
     //Optionally add the file transport
-    if(!GLOBAL.config.cfg_no_log_file) {
+    if(!GLOBAL.config.cfg_disable_file_logging) {
         transports.push(new _winstonDailyRotateFile({
             level: GLOBAL.config.cfg_log_level,
             filename: _path.join(GLOBAL.config.cfg_logs_dir, 'app'),

@@ -83,7 +83,7 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                         type: 'string',
                         describe: 'Specifies the log level of the logger. \r\n  '
                     })
-                    .option('no-log-console', {
+                    .option('disable-console-logging', {
                         demand: false,
                         default: false,
                         type: 'boolean',
@@ -92,7 +92,7 @@ var args = _yargs.usage('Usage: $0 [OPTIONS]')
                                     'option if the client is being executed as a daemon, ' +
                                     'without captureing stdout/stderr.\r\n'
                     })
-                    .option('no-log-file', {
+                    .option('disable-file-logging', {
                         demand: false,
                         default: false,
                         type: 'boolean',
@@ -116,8 +116,8 @@ GLOBAL.config.cfg_logs_dir = args.logDir;
 GLOBAL.config.cfg_module_base_dir = args.connectorDir;
 
 GLOBAL.config.cfg_log_level = args.logLevel;
-GLOBAL.config.cfg_no_log_file = args.noLogFile;
-GLOBAL.config.cfg_no_log_console = args.noLogConsole;
+GLOBAL.config.cfg_disable_file_logging = args.disableFileLogging;
+GLOBAL.config.cfg_disable_console_logging = args.disableConsoleLogging;
 
 GLOBAL.config.cfg_baseline_config_file = args.baselineConfigFile;
 GLOBAL.config.cfg_outbound_network_interface = args.outboundNetworkInterface;
