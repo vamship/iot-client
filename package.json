@@ -31,12 +31,14 @@
     "unirest": "^0.4.2",
     "winston": "^2.1.1",
     "winston-daily-rotate-file": "^1.0.1",
-    "wiring-pi": "^2.1.1",
     "yargs": "^3.27.0"
   },
   "devDependencies": {
     "colors": "^1.1.2",
     "prompt": "^0.2.14"
+  },
+  "optionalDependencies": {
+    "wiring-pi": "^2.1.1"
   },
   "directories": {
     "test": "test"
