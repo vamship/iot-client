@@ -50,7 +50,7 @@ Pm2Helper.prototype._connectToPm2 = function() {
  */
 Pm2Helper.prototype._startPm2App = function(script) {
     var def = _q.defer();
-    this._logger.info('Starting PM2 app: [%s]' script);
+    this._logger.info('Starting PM2 app: [%s]', script);
     _pm2.start(script, {}, function(err) {
         if(err) {
             var message = _util.format('Error starting PM2 app [%s]: [%s]', script, err);
