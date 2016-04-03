@@ -4,11 +4,11 @@
         "EbaraPump": "./ebara-pump-connector",
         "Mqtt": "./mqtt-connector",
         "ButtonMqtt": "./button-mqtt-connector",
+        "Demo": "./demo-connector",
         "CncCloud": "./cnc-cloud-connector",
         "CncGateway": "./cnc-gateway-connector",
         "LeptonCamera": "./lepton-camera-connector"
     },
-
     "cloudConnectors": {
         "testgw-cnc-cloud": {
             "type": "CncCloud",
@@ -24,16 +24,26 @@
             }
         }
     },
-
     "deviceConnectors": {
         "testgw-cnc-gateway": {
             "type": "CncGateway",
-            "config": {
-            }
+            "config": {}
         }
     },
-
     "cloudConnectors.ignore": {
+        "testgw-cnc-cloud": {
+            "type": "CncCloud",
+            "config": {
+                "host": "api-iot-dev.analoggarage.com",
+                "port": 8443,
+                "protocol": "mqtts",
+                "networkInterface": "en0",
+                "gatewayname": "testgw",
+                "account": "test-account",
+                "password": "",
+                "topics": ""
+            }
+        },
         "http": {
             "type": "Http",
             "config": {
@@ -46,8 +56,17 @@
             }
         }
     },
-
     "deviceConnectors.ignore": {
+        "demo": {
+            "type": "Demo",
+            "config": {
+                "pollFrequency": 1000,
+                "greenLedPin": 4,
+                "redLedPin": 4,
+                "redLedBlinkRate": 1,
+                "greenLedBlinkRate": 2
+            }
+        },
         "lepton-camera0": {
             "type": "LeptonCamera",
             "config": {
@@ -58,7 +77,6 @@
                 "cameraResetPin": 23
             }
         },
-
         "ebara-pump0": {
             "type": "EbaraPump",
             "config": {
@@ -72,7 +90,6 @@
                 "pumpRequestTimeout": 60000
             }
         },
-
         "buttons-hub0": {
             "type": "ButtonMqtt",
             "config": {
