@@ -1,6 +1,6 @@
 {
   "name": "iot-client",
-  "version": "2.8.2",
+  "version": "2.8.3",
   "description": "IOT client implementation with an extensible architecture for multiple sensors",
   "main": "app/index.js",
   "scripts": {
