@@ -56,6 +56,13 @@ ButtonMqttConnector.prototype._processSequence = function(sequence, sensorName, 
 ButtonMqttConnector.prototype._processObjectPayload = function(payload) {
     var messages = [];
     messages = messages.concat(this._processSequence(payload.buttonPress, 'button', 1));
+    if(messages.length === 0) {
+        // No data received. Treat it as a heartbeat
+        messages.push({
+            timestamp: Date.now(),
+            button: 0
+        });
+    }
     if(payload.alertReset > 0) {
         messages.push({
             timestamp: payload.alertReset * 1000,
