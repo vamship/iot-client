@@ -31,6 +31,7 @@ ButtonMqttConnector.prototype._processSequence = function(sequence, sensorName, 
     }
 
     var baseTimestamp = null;
+    var counter = 0;
     sequence.forEach(function(offset) {
         if(baseTimestamp === null) {
             baseTimestamp = offset;
@@ -39,10 +40,11 @@ ButtonMqttConnector.prototype._processSequence = function(sequence, sensorName, 
         var data = {
             // We are getting time in seconds, and need to report it
             // in milliseconds
-            timestamp: (baseTimestamp + offset) * 1000
+            timestamp: ((baseTimestamp + offset) * 1000) + counter
         };
         data[sensorName] = value;
         messages.push(data);
+        counter++;
     });
 
     return messages;
