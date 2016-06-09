@@ -18,37 +18,6 @@ function ButtonMqttConnector(id) {
 
 _util.inherits(ButtonMqttConnector, MqttConnector);
 
-/**
- * @class ButtonMqttConnector
- * @method _processSequence
- * @private
- */
-ButtonMqttConnector.prototype._processSequence = function(sequence, sensorName, value) {
-    var messages = [];
-    if(!(sequence instanceof Array)) {
-        this._logger.warn('Cannot process sequence. Input is not an array');
-        return messages;
-    }
-
-    var baseTimestamp = null;
-    var counter = 0;
-    sequence.forEach(function(offset) {
-        if(baseTimestamp === null) {
-            baseTimestamp = offset;
-            offset = 0;
-        }
-        var data = {
-            // We are getting time in seconds, and need to report it
-            // in milliseconds
-            timestamp: ((baseTimestamp + offset) * 1000) + counter
-        };
-        data[sensorName] = value;
-        messages.push(data);
-        counter++;
-    });
-
-    return messages;
-};
 
 /**
  * @class ButtonMqttConnector
@@ -57,28 +26,35 @@ ButtonMqttConnector.prototype._processSequence = function(sequence, sensorName, 
  */
 ButtonMqttConnector.prototype._processObjectPayload = function(payload) {
     var messages = [];
-    messages = messages.concat(this._processSequence(payload.buttonPress, 'button', 1));
-    if(messages.length === 0) {
-        // No data received. Treat it as a heartbeat
-        messages.push({
-            timestamp: Date.now(),
-            button: 0
-        });
+    var counter = 0;
+    var value = 1;
+
+    if(payload.action === 'heartbeat') {
+        value = 0;
+    } else if(payload.action === 'alert_reset') {
+        value = 2;
     }
-    if(payload.alertReset > 0) {
-        messages.push({
-            timestamp: payload.alertReset * 1000,
-            button: 2
-        });
+    // HACK: The button is sending us a single timestamp record in
+    // an array instead of a single numerical value
+    if(payload.timestamp instanceof Array) {
+        payload.timestamp = payload.timestamp[0];
     }
-    for(var key in payload) {
-        if(key !== 'buttonPress' && key !== 'alertReset') {
-            var data = {
-                timestamp: Date.now()
-            };
-            data[key] = payload[key];
-            messages.push(data);
-        }
+    payload.press.forEach(function(offset) {
+        messages.push({
+            // We are getting time in seconds, and need to report it
+            // in milliseconds
+            timestamp: ((payload.timestamp + offset) * 1000) + counter,
+            button: value,
+        });
+        counter++;
+    });
+    if(payload.battery) {
+        messages.push({
+            // We are getting time in seconds, and need to report it
+            // in milliseconds
+            timestamp: (payload.timestamp * 1000) + counter,
+            battery: payload.battery,
+        });
     }
     return messages;
 };
