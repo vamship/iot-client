@@ -111,7 +111,7 @@ ButtonMqttConnector.prototype._processBrokerMessage = function(topic, message) {
     }
 
     var eventData = [];
-    if(sensorName === 'all') {
+    if(sensorName === 'data') {
         this._logger.debug('Parsing message as object');
         try {
             var payload = JSON.parse(message);
