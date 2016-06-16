@@ -2,6 +2,8 @@
 'use strict';
 
 var _util = require('util');
+var _shortId = require('shortid');
+var Connector = require('iot-client-lib').Connector;
 var MqttConnector = require('./mqtt-connector');
 
 /**
@@ -117,6 +119,11 @@ ButtonMqttConnector.prototype._processBrokerMessage = function(topic, message) {
         } catch (ex) {
             this._logger.warn('Unable to parse object payload: [%s]', message, ex);
         }
+    } else if(sensorName === 'log') {
+        this.emit(Connector.LOG_EVENT, {
+            requestId: 'button_log_' + _shortId.generate(),
+            message: topic + '::' + message
+        });
     } else {
         this._logger.debug('Parsing message as number');
         eventData = eventData.concat(this._processNumberPayload(sensorName, message));
