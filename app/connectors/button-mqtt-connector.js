@@ -122,7 +122,7 @@ ButtonMqttConnector.prototype._processBrokerMessage = function(topic, message) {
     } else if(sensorName === 'log') {
         this.emit(Connector.LOG_EVENT, {
             requestId: 'button_log_' + _shortId.generate(),
-            message: topic + '::' + message
+            data: topic + '::' + message
         });
     } else {
         this._logger.debug('Parsing message as number');
