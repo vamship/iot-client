@@ -153,10 +153,10 @@ EbaraPumpParser.prototype._parseResponse = function(data) {
 
         if(index === 0) {
             this._populateTimestamp(payload.data, tokens);
-        } else if (index>1 && index<12) {
-            this._populateSensorData(payload.data, tokens);
-        } else if(index === 12) {
+        } else if(index === data.length - 2) {
             payload.id = tokens[1];
+        } else if (index>1 && index<data.length - 2) {
+            this._populateSensorData(payload.data, tokens);
         }
     }
     return payload;
