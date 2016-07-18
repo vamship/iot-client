@@ -11,25 +11,55 @@
         "LeptonPanTiltCamera": "./lepton-pan-tilt-connector"
     },
     "cloudConnectors": {
-        "testgw-cnc-cloud": {
-            "type": "CncCloud",
-            "config": {
-                "host": "api-iot-dev.analoggarage.com",
-                "port": 8443,
-                "protocol": "mqtts",
-                "networkInterface": "en0",
-                "gatewayname": "testgw",
-                "account": "test-account",
-                "password": "",
-                "topics": ""
-            }
-        }
     },
     "deviceConnectors": {
         "testgw-cnc-gateway": {
             "type": "CncGateway",
             "config": {}
-        }
+        },
+        "lepton-pan-tilt-camera0": {
+            "type": "LeptonPanTiltCamera",
+            "config": {
+                "scanUpdateFrequency":50,
+                "recaptureMaxRetries":2,
+                "recaptureTime":500,
+                "pollFrequency": 6000,
+                "spiDevice": "/dev/spidev0.1",
+                "i2cDevice": "/dev/i2c-1",
+                "maxRetries": 600,
+                "cameraResetPin": 23,
+		"cameraLightsPin": 4,
+		"rgbEnabled": false,
+		"rgbDevice": "/dev/video0",
+		"rgbBinary": "/usr/bin/fswebcam",
+		"rgbResolution": "640x480",
+
+                "tiltServo": {
+                    "pin": 24,
+                    "minAngle": 30,
+                    "maxAngle": 110,
+                    "incAngle": 1
+                },
+
+                "panServo": {
+                    "pin": 1,
+                    "minAngle": 40,
+                    "maxAngle": 120,
+                    "incAngle": 1
+                },
+
+                "moves": [ {
+                    "tilt": 50,
+                    "pans": [60,70,80,90,100]
+                }, {
+                    "tilt": 65,
+                    "pans": [60,70,80,90,100]
+                }, {
+                    "tilt": 80,
+                    "pans": [60,70,80,90,100]
+                } ]
+            }
+	}
     },
     "cloudConnectors.ignore": {
         "testgw-cnc-cloud": {
