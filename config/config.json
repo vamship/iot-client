@@ -1,144 +1,19 @@
 {
+    "version": "1.0.0",
+    "startupMode": "normal",
     "connectorTypes": {
-        "Http": "./http-connector",
-        "EbaraPump": "./ebara-pump-connector",
-        "Mqtt": "./mqtt-connector",
-        "ButtonMqtt": "./button-mqtt-connector",
-        "Demo": "./demo-connector",
-        "CncCloud": "./cnc-cloud-connector",
-        "CncGateway": "./cnc-gateway-connector",
-        "LeptonCamera": "./lepton-camera-connector",
-        "LeptonPanTiltCamera": "./lepton-pan-tilt-connector"
+        "AwsCnc": "./lib/connectors/aws-cnc-connector"
     },
-    "cloudConnectors": {
-        "testgw-cnc-cloud": {
-            "type": "CncCloud",
-            "config": {
-                "host": "api-iot-dev.analoggarage.com",
-                "port": 8443,
-                "protocol": "mqtts",
-                "networkInterface": "en0",
-                "gatewayname": "testgw",
-                "account": "test-account",
-                "password": "",
-                "topics": ""
-            }
+    "cnc": {
+        "type": "AwsCnc",
+        "config": {
+            "agentCert": "./config/keys/agent-cert.pem.crt",
+            "agentPrivateKey": "./config/keys/agent-private-key.pem",
+            "serverCert": "./config/keys/aws-server-root-ca.pem.crt",
+            "awsRegion": "us-east-1",
+            "thingName": "vp_iot_gateway"
         }
     },
-    "deviceConnectors": {
-        "testgw-cnc-gateway": {
-            "type": "CncGateway",
-            "config": {}
-        }
-    },
-    "cloudConnectors.ignore": {
-        "testgw-cnc-cloud": {
-            "type": "CncCloud",
-            "config": {
-                "host": "api-iot-dev.analoggarage.com",
-                "port": 8443,
-                "protocol": "mqtts",
-                "networkInterface": "en0",
-                "gatewayname": "testgw",
-                "account": "test-account",
-                "password": "",
-                "topics": ""
-            }
-        },
-        "http": {
-            "type": "Http",
-            "config": {
-                "pollFrequency": 10000,
-                "url": "https://api-iot.analoggarage.com",
-                "headers": {
-                    "authorization": "gateway1|__hash__key__",
-                    "content-type": "application/json"
-                }
-            }
-        }
-    },
-    "deviceConnectors.ignore": {
-        "demo": {
-            "type": "Demo",
-            "config": {
-                "pollFrequency": 1000,
-                "greenLedPin": 4,
-                "redLedPin": 4,
-                "redLedBlinkRate": 1,
-                "greenLedBlinkRate": 2
-            }
-        },
-        "lepton-camera0": {
-            "type": "LeptonCamera",
-            "config": {
-                "pollFrequency": 5000,
-                "spiDevice": "/dev/spidev0.1",
-                "i2cDevice": "/dev/i2c-1",
-                "maxRetries": 600,
-                "cameraResetPin": 23
-            }
-        },
-        "lepton-pan-tilt-camera0": {
-            "type": "LeptonPanTiltCamera",
-            "config": {
-                "scanUpdateFrequency":50,
-                "recaptureMaxRetries":20,
-                "recaptureTime":500,
-                "pollFrequency": 6000,
-                "spiDevice": "/dev/spidev0.1",
-                "i2cDevice": "/dev/i2c-1",
-                "maxRetries": 600,
-                "cameraResetPin": 23,
-
-                "tiltServo": {
-                    "pin": 24,
-                    "minAngle": 30,
-                    "maxAngle": 110,
-                    "incAngle": 1
-                },
-
-                "panServo": {
-                    "pin": 1,
-                    "minAngle": 40,
-                    "maxAngle": 120,
-                    "incAngle": 1
-                },
-
-                "moves": [ {
-                    "tilt": 50,
-                    "pans": [60,70,80,90,100]
-                }, {
-                    "tilt": 65,
-                    "pans": [60,70,80,90,100]
-                }, {
-                    "tilt": 80,
-                    "pans": [60,70,80,90,100]
-                } ]
-            }
-        },
-        "ebara-pump0": {
-            "type": "EbaraPump",
-            "config": {
-                "pollFrequency": 5000,
-                "portName": "/dev/pump0",
-                "baudRate": 9600,
-                "parity": "none",
-                "stopBits": 1,
-                "dataBits": 7,
-                "flowControl": false,
-                "pumpRequestTimeout": 60000
-            }
-        },
-        "buttons-hub0": {
-            "type": "ButtonMqtt",
-            "config": {
-                "host": "10.0.0.1",
-                "port": 1883,
-                "networkInterface": "en0",
-                "username": "esp",
-                "password": "buddon",
-                "topics": "/things/+/+"
-            }
-        }
+    "connectors": {
     }
 }

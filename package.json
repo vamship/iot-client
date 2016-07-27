@@ -1,55 +1,52 @@
 {
   "name": "iot-client",
-  "version": "2.8.10",
-  "description": "IOT client implementation with an extensible architecture for multiple sensors",
+  "version": "3.0.0",
+  "description": "IoT client agent for gateways",
   "main": "app/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "bin": {
-    "iotclient": "app/index.js"
-  },
-  "keywords": [
-    "iot",
-    "client",
-    "raspberry pi"
-  ],
-  "author": "Vamshi Ponnapalli <vamshi.ponnapalli@gmail.com>",
-  "license": "ISC",
-  "dependencies": {
-    "clone": "^1.0.2",
-    "iot-client-lib": "^3.1.1",
-    "macaddress": "^0.2.8",
-    "mqtt": "^1.6.1",
-    "node-clone": "^0.1.1",
-    "pi-gpio": "0.0.8",
-    "pm2": "^1.0.1",
-    "q": "^1.4.1",
-    "serialport": "^1.7.4",
-    "shortid": "^2.2.6",
-    "spi": "^0.2.0",
-    "touch": "^1.0.0",
-    "unirest": "^0.4.2",
-    "winston": "^2.1.1",
-    "winston-daily-rotate-file": "^1.0.1",
-    "yargs": "^3.27.0"
-  },
-  "devDependencies": {
-    "colors": "^1.1.2",
-    "prompt": "^0.2.14"
-  },
-  "optionalDependencies": {
-    "wiring-pi": "^2.1.1"
-  },
   "directories": {
     "test": "test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/vamship/iot-client.git"
+  "bin": {
+    "iotclient": "./bin/iot-client.js"
   },
-  "bugs": {
-    "url": "https://github.com/vamship/iot-client/issues"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "homepage": "https://github.com/vamship/iot-client#readme"
+  "keywords": [
+    "IoT",
+    "gateway",
+    "agent"
+  ],
+  "author": "Vamshi K Ponnapalli <vamshi.ponnapalli@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "aws-iot-device-sdk": "^1.0.12",
+    "bluebird": "^3.3.5",
+    "bunyan": "^1.8.1",
+    "clone": "^1.0.2",
+    "semver": "^5.1.0",
+    "shortid": "^2.2.6",
+    "yargs": "^4.7.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "grunt": "^1.0.1",
+    "grunt-bump": "^0.8.0",
+    "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-jsbeautifier": "^0.2.12",
+    "grunt-mocha-istanbul": "^4.0.2",
+    "istanbul": "^0.4.3",
+    "jshint-stylish": "^2.2.0",
+    "load-grunt-tasks": "^3.5.0",
+    "mocha": "^2.4.5",
+    "rewire": "^2.5.1",
+    "sinon": "^1.17.4",
+    "sinon-chai": "^2.8.0",
+    "time-grunt": "^1.3.0",
+    "wysknd-lib": "0.0.2",
+    "wysknd-test": "^1.1.3"
+  }
 }
