@@ -10,6 +10,9 @@ var _wiringPi = require('../utils/wiring-pi-wrapper');
 var PollingConnector = require('iot-client-lib').PollingConnector;
 var spawn = require('child_process').spawn;
 
+var PiCamera = require('../utils/node-picam/lib/Camera').Camera;
+//var PiCameraOptions = require('../utils/node-picam/lib/StillOptions').Options;
+
 var PACKET_SIZE = 164;
 var PACKETS_PER_FRAME = 60;
 var DEFAULT_MAX_RETRIES = 750;
@@ -41,7 +44,6 @@ Servo.prototype.move = function(angle, callback) {
    this.target = angle;
    this.callback = callback;
 
-
    if (this.target < this.angle) 
    {
 	this.direction = -1;
@@ -53,7 +55,6 @@ Servo.prototype.move = function(angle, callback) {
 
    if (this.angle == this.target && this.callback != null) {
 	this.callback();
-        //this.callback = null;
    }
 };
 
@@ -79,7 +80,6 @@ Servo.prototype.update = function() {
 	if (this.callback != null) 
 	{
 	    this.callback();
-            //this.callback = null;
 	}
    }
 };
@@ -106,6 +106,7 @@ function LeptonPanTiltCameraConnector(id) {
     this._panServo = null;
 
     this._updateCount = 0;
+    this._picam = null;
 }
 
 _util.inherits(LeptonPanTiltCameraConnector, PollingConnector);
@@ -127,7 +128,7 @@ LeptonPanTiltCameraConnector.prototype._resetCamera = function() {
         this._logger.info('Camera reset complete');
         _wiringPi.digitalWrite(this._config.cameraResetPin, 1);
         //this._camera = camera;
-    }.bind(this), 500);
+    }.bind(this), this._config.cameraResetTimeout);
 };
 
 /**
@@ -204,13 +205,6 @@ LeptonPanTiltCameraConnector.prototype._start = function() {
 	    console.log('----iinitializing servos...');
 	    this._tiltServo = new Servo( this._config.tiltServo );
 	    this._panServo = new Servo( this._config.panServo );
-
-	    console.log('tiltservo:');
-	    console.log( this._tiltServo );
-
-	    console.log('panservo:');
-	    console.log( this._panServo );
-
 
 	    /* setup wiring pi */
 	    //_wiringPi.setup('wpi');
@@ -372,29 +366,29 @@ LeptonPanTiltCameraConnector.prototype._capture = function() {
     
     if (payload == null) 
     {
-	pantilt._abortScan();
-	return;
+        pantilt._abortScan();
+        return;
     }
     else if (!pantilt._config.rgbEnabled)
     {
         pantilt._logger.info('Emitting sensor data for node');
-	pantilt.emit('data', payload);
-	pantilt._captureFinished();
-	return;
+        pantilt.emit('data', payload);
+        pantilt._captureFinished();
+        return;
     }
 
     var rgbPromise = pantilt._doRGBCapture();
 
     rgbPromise.then(
-        function success(data) {
-	    pantilt._logger.info('Emitting sensor data for node');
-	    payload.data.camera.rgbimage = data
-	    pantilt.emit('data', payload);
-	    pantilt._captureFinished();
+        function success(image) {
+            pantilt._logger.info('Emitting sensor data for node');
+            payload.data.camera.rgbimage = image;
+            pantilt.emit('data', payload);
+            pantilt._captureFinished();
         },
-        function fail() {
-            pantilt._logger.info('Fail to capture RGB image');
-	    pantilt._abortScan();
+        function fail(error) {
+            pantilt._logger.info('Fail to capture RGB image.  Error: ' + error);
+            pantilt._abortScan();
         }
     );
 };
@@ -546,12 +540,12 @@ LeptonPanTiltCameraConnector.prototype._doIRCapture = function() {
      {
         data = this._captureIR();
         if (data != null) {
-		break;
+            break;
         }
 
         if (this._captureRetries == this._config.recaptureMaxRetries) {
-                this._logger.info('Maximum recapture retries reached - aborting scan.');
-		break;
+            this._logger.info('Maximum recapture retries reached - aborting scan.');
+            break;
         }
 
         console.log('trying ...', this._captureRetries);
@@ -658,7 +652,7 @@ LeptonPanTiltCameraConnector.prototype._captureIR = function() {
             //this._logger.info('Emitting sensor data for node');
             //this.emit('data', payload);
 
-	    return payload;
+            return payload;
 
         } else {
             this._logger.warn('Error reading frame from camera. No data to send');
@@ -676,63 +670,35 @@ LeptonPanTiltCameraConnector.prototype._doRGBCapture = function() {
 
 	this._logger.info("_doRGBCapture()");
 
-        var deferred = _q.defer();
-        var pantilt = this;
+    var deferred = _q.defer();
+    var pantilt = this;
 
 	this._setEnableLights( true );
 
-        var path = RGB_PATH_PREFIX + pantilt._row + '_' + pantilt._col + '.jpg';
-        path = _path.join(__dirname, path);
+    var options = PiCamera.DEFAULT_PROFILE.opts;
+    options.controls.flipVertical = false;
+    options.settings.width = this._config.rgbWidth;;
+    options.settings.height = this._config.rgbHeight;;
+    this._picam = new PiCamera( options );
 
-	var options = [ '--device', this._config.rgbDevice,
-			'--resolution', this._config.rgbResolution,
-                        path];
-        var fswebcam = spawn( this._config.rgbBinary, options );
+    // take the picture
+    pantilt._picam.takeJPG();
 
-	// Log any errors.
-        fswebcam.on('error', function (data) {
-		pantilt._logger.warn(data);
-		pantilt._setEnableLights( false );
-		return deferred.reject(null);
-	});
+    // handle snapped event (i.e when the picture data is fully captured)
+    pantilt._picam.on('snapped', function(results) 
+    {
+        pantilt._setEnableLights( false );
+        return deferred.resolve(results.image);
+    }); 
 
-	// continue processing after it has taken photos
-	fswebcam.on('exit', function (code) {
-		pantilt._setEnableLights( false );
-		pantilt.rgbRetries = RGB_MAX_READ_RETRIES;
-		var data = pantilt._readRGBImage();
-		return deferred.resolve(data);
-	});
+    // handle errors
+    pantilt._picam.on('error', function(results) 
+    {
+        pantilt._setEnableLights( false );
+        return deferred.reject(results.error);
+    }); 
 
 	return deferred.promise	
-};
-
-LeptonPanTiltCameraConnector.prototype._readRGBImage = function( ) {
-
-	this._logger.info('_readRGBImage()');
-
-        var path = RGB_PATH_PREFIX + this._row + '_' + this._col + '.jpg';
-	path = _path.join(__dirname, path);
-
-	var data = null;
-	if (this.rgbRetries == 0) return null;
-
-	try
-	{
-	    // read binary data
-	    var bitmap = _fs.readFileSync( path );
-
-	    // convert binary data to base64 encoded string
-	    data = new Buffer(bitmap).toString('base64');
-	}
-	catch(e)
-	{
-		console.log('retrying....error: ' + e );
-		this.rgbRetries -= 1;
-		setTimeout(this._readRGBImage.bind(this), 100);
-	}
-
-	return data;
 };
 
 LeptonPanTiltCameraConnector.prototype._setEnableLights = function( on ) {
