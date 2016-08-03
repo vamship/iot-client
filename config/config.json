@@ -20,9 +20,10 @@
         "lepton-pan-tilt-camera0": {
             "type": "LeptonPanTiltCamera",
             "config": {
+                "saveToFile":false,
                 "scanUpdateFrequency":50,
                 "recaptureMaxRetries":2,
-                "recaptureTime":500,
+                "recaptureTime":1000,
                 "pollFrequency": 6000,
                 "spiDevice": "/dev/spidev0.1",
                 "i2cDevice": "/dev/i2c-1",
@@ -49,13 +50,13 @@
                 },
 
                 "moves": [ {
-                    "tilt": 50,
+                    "tilt": 80,
                     "pans": [60,70,80,90,100]
                 }, {
                     "tilt": 65,
                     "pans": [60,70,80,90,100]
                 }, {
-                    "tilt": 80,
+                    "tilt": 50,
                     "pans": [60,70,80,90,100]
                 } ]
             }

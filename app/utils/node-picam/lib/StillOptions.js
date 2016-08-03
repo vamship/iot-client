@@ -233,6 +233,14 @@ Options.prototype.toArray = function () {
 		result.push(opts.settings.imageType);
 	}
 
+    result.push("--output");
+    if (isDefined(opts.settings.outputPath)) {
+        result.push(opts.settings.outputPath);
+    }
+    else {
+        result.push("-");
+    }
+
 	//TODO: [medium] (nhat) - add timelapse
 
 

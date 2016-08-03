@@ -55,7 +55,9 @@ function buildOptions(options, imageType) {
 }
 
 function takePhoto(id, options, camera) {
-	var pid = spawn(COMMAND, ["--output", "-"].concat(options.toArray()));
+
+	//var pid = spawn(COMMAND, ["--output", "-"].concat(options.toArray()));
+    var pid = spawn(COMMAND, options.toArray());
 
 	var imageData = new Buffer(0);
 
