@@ -95,8 +95,6 @@ var PUMP_SENSORS  = [
  * @constructor
  */
 function EbaraPumpParser(id) {
-    // <ESC> 'A' 'A' 'N' 'E', ',' '3' '0' <CR> <LF>
-    this.connectMessage = new Buffer([ 27, 65, 65, 78, 69, 44, 51, 48, 13, 10 ]);
     this.reset();
     this._logger = _loggerProvider.getLogger(id);
 }
