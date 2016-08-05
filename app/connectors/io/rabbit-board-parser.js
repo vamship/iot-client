@@ -142,12 +142,21 @@ RabbitBoardParser.prototype.getParser = function() {
                 if(line.indexOf('STX') === 0) {
                     this._logger.info('Start of payload received. Clearing buffers');
                     this.reset();
-                } else if(line === 'END') {
-                    emitter.emit('data', this._parseResponse(this._lines));
-                    this._clearDataTimeout(false);
-                    this._lines = [];
-                } else {
                     this._lines.push(line);
+
+                } else if (this._lines.length > 0) {
+                    // This must be the second line or greater.
+                    if(line === 'END') {
+                        emitter.emit('data', this._parseResponse(this._lines));
+                        this._clearDataTimeout(false);
+                        this._lines = [];
+                    } else {
+                        this._lines.push(line);
+                    }
+
+                } else {
+                    // Still on first line, but did not get STX yet.
+                    this._logger.warn('First line of data did not start with "STX". Ignoring line.');
                 }
 
                 this._currentLine = [];
