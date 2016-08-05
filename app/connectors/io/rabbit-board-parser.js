@@ -12,15 +12,15 @@ var SENSOR_MAP = {
 };
 
 /**
- * Represents a parser object that can receive and process data from a vacuum
- * pump
+ * Represents a parser object that can receive and process data from a Rabbit
+ * Board
  *
  * @class RabbitBoardParser
  * @constructor
  */
-function RabbitBoardParser(id) {
+function RabbitBoardParser(id, dataTimeout) {
     this.reset();
-    this._requestTimeout = 60 * 60 * 1000;
+    this._dataTimeoutDuration = dataTimeout;
     this._logger = _loggerProvider.getLogger(id);
 }
 
@@ -75,10 +75,9 @@ RabbitBoardParser.prototype._parseResponse = function(data) {
         });
 
         if(index === 0) {
-            this._populateTimestamp(payload.data, tokens);
-        } else if(index === data.length - 2) {
+            //this._populateTimestamp(payload.data, tokens);
             payload.id = tokens[1];
-        } else if (index>1 && index<data.length - 2) {
+        } else if (index>1 && index<data.length - 1) {
             this._populateSensorData(payload.data, tokens);
         }
     }
@@ -97,18 +96,18 @@ RabbitBoardParser.prototype._clearDataTimeout = function(startNew) {
         this._dataTimeoutHandle = null;
     }
     if(startNew) {
-        this._logger.info('Initializing data timeout handler');
+        this._logger.info('Initializing data timeout handler: [%s]', this._dataTimeoutDuration);
         this._dataTimeoutHandle = setTimeout(function() {
             this._logger.info('Data flow timed out. Reseting parser');
             this.reset();
             this._clearDataTimeout(false);
-        }.bind(this), this._requestTimeout);
+        }.bind(this), this._dataTimeoutDuration);
     }
 };
 
 /**
  * Resets the parser, discarding any unprocessed data that has been received
- * from the pump
+ * from the rabbit board.
  *
  * @class RabbitBoardParser
  * @method reset
@@ -138,9 +137,12 @@ RabbitBoardParser.prototype.getParser = function() {
                 var buf = new Buffer(this._currentLine);
                 var line = buf.toString('ascii');
 
-                this._logger.debug('Pump data: [%s]', line);
+                this._logger.debug('Rabbit board data: [%s]', line);
 
-                if(line === 'END') {
+                if(line.indexOf('STX') === 0) {
+                    this._logger.info('Start of payload received. Clearing buffers');
+                    this.reset();
+                } else if(line === 'END') {
                     emitter.emit('data', this._parseResponse(this._lines));
                     this._clearDataTimeout(false);
                     this._lines = [];

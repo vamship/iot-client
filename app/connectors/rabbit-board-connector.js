@@ -7,10 +7,10 @@ var _serialport = require('serialport');
 var SerialPort = _serialport.SerialPort;
 //SerialPort = require('../../test/mock-serial-port');
 var Connector = require('iot-client-lib').Connector;
-var RabbitPumpParser = require('./io/rabbit-board-parser');
+var RabbitBoardParser = require('./io/rabbit-board-parser');
 
 /**
- * Connector that interfaces with a vacuum pump over a serial port (RS232) and
+ * Connector that interfaces with a rabbit board over a serial port (RS232) and
  * extracts data intended for the cloud.
  *
  * @class RabbitBoardConnector
@@ -20,9 +20,9 @@ var RabbitPumpParser = require('./io/rabbit-board-parser');
 function RabbitBoardConnector(id) {
     RabbitBoardConnector.super_.call(this, id)
 
-    this._pumpParser = new RabbitPumpParser(id);
+    this._dataParser = null;
     this._requestResetHandle = null;
-    this._requestTimeout = 60 * 60 * 1000;
+    this._dataTimeout = 60 * 60 * 1000;
 }
 
 _util.inherits(RabbitBoardConnector, Connector);
@@ -74,7 +74,7 @@ RabbitBoardConnector.prototype._dataHandler = function(payload) {
  */
 RabbitBoardConnector.prototype._errorHandler = function(err) {
     this._logger.error('Error occurred when communicating on the port: ', err);
-    this._pumpParser.reset();
+    this._dataParser.reset();
 };
 
 /**
@@ -86,22 +86,25 @@ RabbitBoardConnector.prototype._start = function() {
     this._logger.info('Initializing connector');
 
     var def = _q.defer();
+
+    if(typeof this._config.dataTimeout !== 'number' ||
+        this._config.dataTimeout <= 0) {
+        def.reject('Data timeout parameter not valid: ' +
+                                        this._config.dataTimeout);
+        return;
+    }
+    this._dataTimeout = this._config.dataTimeout;
+
+    this._dataParser = new RabbitBoardParser(this._id, this._dataTimeout);
+
     this._port = new SerialPort(this._config.portName, {
         baudrate: this._config.baudRate,
         parity: this._config.parity,
         stopbits: this._config.stopBits,
         databits: this._config.dataBits,
         flowControl: this._config.flowControl,
-        parser: this._pumpParser.getParser()
+        parser: this._dataParser.getParser()
     }, false);
-
-    if(typeof this._config.pumpRequestTimeout !== 'number' ||
-        this._config.pumpRequestTimeout <= 0) {
-        def.reject('Pump request timeout parameter not valid: ' +
-                                        this._config.pumpRequestTimeout);
-        return;
-    }
-    this._requestTimeout = this._config.pumpRequestTimeout;
 
     this._port.open(function(err) {
         if(err) {
@@ -114,9 +117,7 @@ RabbitBoardConnector.prototype._start = function() {
         def.resolve();
     }.bind(this));
 
-    // Allow the super class to do its thing after we are done
-    // initializing the port.
-    return def.promise.then(RabbitBoardConnector.super_.prototype._start.bind(this));
+    return def.promise;
 };
 
 /**
@@ -141,9 +142,7 @@ RabbitBoardConnector.prototype._stop = function() {
         def.resolve();
     }
 
-    // Allow the super class to do its thing after we are done
-    // initializing the port.
-    return promise.fin(RabbitBoardConnector.super_.prototype._stop.bind(this));
+    return promise;
 };
 
 /**
@@ -151,29 +150,29 @@ RabbitBoardConnector.prototype._stop = function() {
  * @method _process
  * @protected
  */
-RabbitBoardConnector.prototype._process = function() {
-    if(this._port && this._port.isOpen()) {
-        if(this._requestPending) {
-            this._logger.info('Waiting for response from previous request. No new request will be dispatched');
-            return;
-        }
-        this._port.write(this._pumpParser.connectMessage, function(err, data) {
-            if(err) {
-                this._logger.error('Error writing data on port: [%s]. Details: ', this._config.portName, err);
-            } else {
-                this._logger.debug('Command successfully sent to pump. Result: [%s]', data);
-            }
-        }.bind(this));
+// RabbitBoardConnector.prototype._process = function() {
+//     if(this._port && this._port.isOpen()) {
+//         if(this._requestPending) {
+//             this._logger.info('Waiting for response from previous request. No new request will be dispatched');
+//             return;
+//         }
+//         this._port.write(this._dataParser.connectMessage, function(err, data) {
+//             if(err) {
+//                 this._logger.error('Error writing data on port: [%s]. Details: ', this._config.portName, err);
+//             } else {
+//                 this._logger.debug('Command successfully sent to pump. Result: [%s]', data);
+//             }
+//         }.bind(this));
 
-        this._requestPending = true;
-        this._requestResetHandle = setTimeout(function() {
-            this._logger.info('Request sent flag reset (timeout expired)');
-            this._requestPending = false;
-            this._requestResetHandle = null;
-        }.bind(this), this._requestTimeout);
-    } else {
-        this._logger.warn('Port not initialized and ready');
-    }
-};
+//         this._requestPending = true;
+//         this._requestResetHandle = setTimeout(function() {
+//             this._logger.info('Request sent flag reset (timeout expired)');
+//             this._requestPending = false;
+//             this._requestResetHandle = null;
+//         }.bind(this), this._requestTimeout);
+//     } else {
+//         this._logger.warn('Port not initialized and ready');
+//     }
+// };
 
 module.exports = RabbitBoardConnector;
