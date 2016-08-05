@@ -20,6 +20,7 @@ var SENSOR_MAP = {
  */
 function RabbitBoardParser(id) {
     this.reset();
+    this._requestTimeout = 60 * 60 * 1000;
     this._logger = _loggerProvider.getLogger(id);
 }
 
@@ -82,8 +83,28 @@ RabbitBoardParser.prototype._parseResponse = function(data) {
         }
     }
     return payload;
-}
+};
 
+/**
+ * @class RabbitBoardParser
+ * @method _clearDataTimeout
+ * @private
+ */
+RabbitBoardParser.prototype._clearDataTimeout = function(startNew) {
+    if(this._dataTimeoutHandle) {
+        this._logger.info('Clearing data timeout');
+        clearTimeout(this._dataTimeoutHandle);
+        this._dataTimeoutHandle = null;
+    }
+    if(startNew) {
+        this._logger.info('Initializing data timeout handler');
+        this._dataTimeoutHandle = setTimeout(function() {
+            this._logger.info('Data flow timed out. Reseting parser');
+            this.reset();
+            this._clearDataTimeout(false);
+        }.bind(this), this._requestTimeout);
+    }
+};
 
 /**
  * Resets the parser, discarding any unprocessed data that has been received
@@ -98,6 +119,7 @@ RabbitBoardParser.prototype.reset = function() {
     this._lastByte = null;
 };
 
+
 /**
  * Returns a parser handler for serial port communication
  *
@@ -108,6 +130,8 @@ RabbitBoardParser.prototype.reset = function() {
  */
 RabbitBoardParser.prototype.getParser = function() {
     return function(emitter, buffer) {
+        this._clearDataTimeout(true);
+
         for(var index=0; index<buffer.length; index++) {
             var nextByte = buffer[index];
             if(this._lastByte === CR && nextByte === LF) {
@@ -118,6 +142,7 @@ RabbitBoardParser.prototype.getParser = function() {
 
                 if(line === 'END') {
                     emitter.emit('data', this._parseResponse(this._lines));
+                    this._clearDataTimeout(false);
                     this._lines = [];
                 } else {
                     this._lines.push(line);

@@ -6,7 +6,7 @@ var _q = require('q');
 var _serialport = require('serialport');
 var SerialPort = _serialport.SerialPort;
 //SerialPort = require('../../test/mock-serial-port');
-var PollingConnector = require('iot-client-lib').PollingConnector;
+var Connector = require('iot-client-lib').Connector;
 var RabbitPumpParser = require('./io/rabbit-board-parser');
 
 /**
@@ -21,12 +21,11 @@ function RabbitBoardConnector(id) {
     RabbitBoardConnector.super_.call(this, id)
 
     this._pumpParser = new RabbitPumpParser(id);
-    this._requestPending = false;
     this._requestResetHandle = null;
     this._requestTimeout = 60 * 60 * 1000;
 }
 
-_util.inherits(RabbitBoardConnector, PollingConnector);
+_util.inherits(RabbitBoardConnector, Connector);
 
 /**
  * @class RabbitBoardConnector
@@ -62,7 +61,6 @@ RabbitBoardConnector.prototype._dataHandler = function(payload) {
     this.emit('data', payload);
 
     this._logger.debug('Resetting request pending flag and auto timeout');
-    this._requestPending = false;
     if(this._requestResetHandle) {
         clearTimeout(this._requestResetHandle);
         this._requestResetHandle = null;
