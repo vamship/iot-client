@@ -109,13 +109,13 @@ Options.prototype.toArray = function () {
 
 	if (isDefined(opts.preview) && opts.preview.length == 1) {
 		var val = opts.preview[0];
-		var previewFlag = options.PREVIEW[val];
+		//var previewFlag = opts.PREVIEW[val];
 		if (val == "none") {
 			result.push("--nopreview");
 		} else if (val == "fullscreen") {
 			result.push("--fullscreen");
-		} else if (!previewFlag) {
-			result.push(val);
+		} //else if (!previewFlag) {
+        else {	result.push(val);
 			//TODO: [medium] (nhat) - validate the x,y,w,h string
 		}
 	}

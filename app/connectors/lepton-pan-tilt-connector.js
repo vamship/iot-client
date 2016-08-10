@@ -29,7 +29,7 @@ function Servo( config ) {
 };
 
 Servo.prototype.reset = function() {
-   this.angle = 0;
+   this.angle = this.config.minAngle;
    this.target = 0;
    this.direction = 1;
    this.callback = null;
@@ -71,7 +71,6 @@ Servo.prototype.update = function() {
 
    /* write data to the signal pin */
    _wiringPi.pwmWrite( this.config.pin, this.angle );
-   //console.log('writing angle: ' + this.angle + ' to pin: ' + this.config.pin);
 
    /* first time we reach target, fire the callback */
    if (this.angle != prevAngle && this.angle == this.target) 
@@ -104,12 +103,10 @@ function LeptonPanTiltCameraConnector(id) {
     this._tiltServo = null;
     this._panServo = null;
 
-    this._updateCount = 0;
     this._picam = null;
 }
 
 _util.inherits(LeptonPanTiltCameraConnector, PollingConnector);
-
 
 /**
  * Resets the camera.
@@ -118,16 +115,22 @@ _util.inherits(LeptonPanTiltCameraConnector, PollingConnector);
  * @private
  */
 LeptonPanTiltCameraConnector.prototype._resetCamera = function() {
-    //var camera = this._camera;
-    //this._camera = null;
+
+    var pantilt = this;
+    var def = _q.defer();
 
     this._logger.info('Starting camera reset');
     _wiringPi.digitalWrite(this._config.cameraResetPin, 0);
+
     setTimeout(function() {
-        this._logger.info('Camera reset complete');
-        _wiringPi.digitalWrite(this._config.cameraResetPin, 1);
-        //this._camera = camera;
-    }.bind(this), this._config.cameraResetTimeout);
+        pantilt._logger.info('Camera reset complete');
+        _wiringPi.digitalWrite(pantilt._config.cameraResetPin, 1);
+
+        return def.resolve('reset');
+
+    }.bind(pantilt), pantilt._config.cameraResetTimeout);
+
+    return def.promise;
 };
 
 /**
@@ -185,23 +188,12 @@ LeptonPanTiltCameraConnector.prototype._start = function() {
         this._config.scanUpdateFrequency = DEFAULT_SCANUPDATE_FREQ;
     }
 
-    if(typeof this._config.recaptureMaxRetries !== 'number' ||
-        this._config.recaptureMaxRetries <= 0) {
-        this._config.recaptureMaxRetries = DEFAULT_RECAPTURE_MAXTRIES;
-    }
-
-    if(typeof this._config.recaptureTime !== 'number' ||
-        this._config.recaptureTime <= 0) {
-        this._config.recaptureTime = DEFAULT_RECAPTURE_DELAY;
-    }
-
     try {
         this._stop().fin(function() {
 
             this._logger.info( this._config.tiltServo );
 
             /* setup servos */
-            console.log('----iinitializing servos...');
             this._tiltServo = new Servo( this._config.tiltServo );
             this._panServo = new Servo( this._config.panServo );
 
@@ -255,7 +247,7 @@ LeptonPanTiltCameraConnector.prototype._stop = function() {
     this._logger.info('Stopping connector');
     var def = _q.defer();
     try {
-	this._setEnableLights( false );
+	    this._setEnableLights( false );
 
         if(this._camera) {
             this._logger.info('Closing camera on: [%s]', this._config.spiDevice);
@@ -286,8 +278,6 @@ LeptonPanTiltCameraConnector.prototype._tilt = function() {
      
      var angle = this._config.moves[ this._tiltServo.index ].tilt;
      this._tiltServo.move( angle, this._tiltFinished.bind(this));
-
-     this._logger.info('_tilt - ' +  this._tiltServo.index + '/' + angle);
 };
 
 /**
@@ -301,13 +291,13 @@ LeptonPanTiltCameraConnector.prototype._tiltFinished = function() {
      var nPans = this._config.moves[ this._tiltServo.index ].pans.length;
      if (this._panServo.index > 0) 
      {
-	this._panServo.index = nPans-1;
+	    this._panServo.index = nPans-1;
         this._panServo.indexIncrement = -1;
      }
      else
      {
-	this._panServo.index = 0;
-	this._panServo.indexIncrement = 1;
+	    this._panServo.index = 0;
+	    this._panServo.indexIncrement = 1;
      }
  
      this._pan();
@@ -337,71 +327,52 @@ LeptonPanTiltCameraConnector.prototype._pan = function() {
 LeptonPanTiltCameraConnector.prototype._panFinished = function() {
     this._logger.info('_panFinished - ' + this._panServo.index + '/' + this._panServo.angle);
 
-    this._capture();
-}
-
-/**
- * @class LeptonPanTiltCameraConnector
- * @method _capture
- * @protected
- */
-LeptonPanTiltCameraConnector.prototype._capture = function() {
-
     var pantilt = this;
 
-    if (this._camera == null) return;
+    this._capture();
 
-    console.log('capturing....');
+}
 
-    var tIndex = this._tiltServo.index;
-    var pIndex = this._panServo.index;
-    var tAngle = this._tiltServo.angle;
-    var pAngle = this._panServo.angle;
+LeptonPanTiltCameraConnector.prototype._capture = function() {
 
-    this._logger.info('_capture - tilt: '+ tIndex + '/' + tAngle + ' pan: ' + pIndex + '/' + pAngle );
-
-    this._row = tIndex;
-    this._col = pIndex;
-
-    // First capture the IR Image.
-    var payload = pantilt._doIRCapture();
+    this._row = this._tiltServo.index;
+    this._col = this._panServo.index;
     
-    if (payload == null) 
+    var pantilt = this;
+    var payload = pantilt._captureIR();
+
+    if (payload != null) 
     {
-        pantilt._abortScan();
-        return;
-    }
-    
-    if (pantilt._config.saveToFile) {
-        pantilt._irPacketsToFile( payload.data.camera.lines );
-    }
 
-    if (!pantilt._config.rgbEnabled)
+            if (!pantilt._config.rgbEnabled) 
+            {
+                pantilt.emit('data', payload);
+                pantilt._captureFinished();
+            }
+            else 
+            {
+                pantilt._captureRGB( payload ).then(
+
+                    function success(payload) 
+                    {
+                        pantilt.emit('data', payload);
+                        pantilt._captureFinished();
+                    },
+
+                    function fail(results) 
+                    {
+                        pantilt._abortScan();
+                    }
+                );
+            }
+    } 
+    else 
     {
-        pantilt._logger.info('Emitting sensor data for node');
-        pantilt.emit('data', payload);
-        pantilt._captureFinished();
-        return;
-    }
-
-    var rgbPromise = pantilt._doRGBCapture();
-
-    rgbPromise.then(
-        function success(image) {
-            pantilt._logger.info('Emitting sensor data for node');
-
-            // encode this image with 64 hex
-            payload.data.camera.rgbimage = image.toString('base64');
-            pantilt.emit('data', payload);
-
-            pantilt._captureFinished();
-        },
-        function fail(error) {
-            pantilt._logger.info('Fail to capture RGB image.  Error: ' + error);
+        pantilt._resetCamera().then( function() {
             pantilt._abortScan();
-        }
-    );
-};
+        });
+    }
+}
 
 /**
  * @class LeptonPanTiltCameraConnector
@@ -413,29 +384,29 @@ LeptonPanTiltCameraConnector.prototype._captureFinished = function() {
 
     var tIndex = this._tiltServo.index;
     var pIndex = this._panServo.index;
-    var nPans = this._config.moves[ tIndex ].pans.length;
+    var nPans  = this._config.moves[ tIndex ].pans.length;
 
-    var tNext = tIndex + this._tiltServo.indexIncrement;
-    var pNext = pIndex + this._panServo.indexIncrement;
+    var tNext  = tIndex + this._tiltServo.indexIncrement;
+    var pNext  = pIndex + this._panServo.indexIncrement;
 
     /* reached the end of pan-sweep */
-    if (pNext < 0 || pNext == nPans) {
-	
-	/* reached the end of scan. */
-	if (tNext < 0 || tNext == this._config.moves.length) 
-	{
-		this._scanFinished();
-	}
-	else 
-	{
-	 	this._tiltServo.index += this._tiltServo.indexIncrement;
-		this._tilt();
-	}
+    if (pNext < 0 || pNext == nPans) 
+    {
+        /* reached the end of scan. */
+        if (tNext < 0 || tNext == this._config.moves.length) 
+        {
+            this._scanFinished();
+        }
+        else 
+        {
+            this._tiltServo.index += this._tiltServo.indexIncrement;
+            this._tilt();
+        }
     }
     else 
     {
         this._panServo.index += this._panServo.indexIncrement;
-	this._pan();
+	    this._pan();
     }
 }
 
@@ -446,30 +417,27 @@ LeptonPanTiltCameraConnector.prototype._captureFinished = function() {
  */
 LeptonPanTiltCameraConnector.prototype._startScan = function() {
    this._logger.info('');
-   this._logger.info('---------------------');
    this._logger.info('_startScan');
 
    this._scanning = true;
    this._scan = _shortId.generate();
 
-   this._logger.info('tilt: ' + this._tiltServo.index + '/' + this._tiltServo.angle);
-   this._logger.info('pan: ' + this._panServo.index + '/' + this._panServo.angle);
-
    if (this._tiltServo.index > 0)
    {
-	this._tiltServo.index = this._config.moves.length -1;
-	this._tiltServo.indexIncrement = -1;
+        this._tiltServo.index = this._config.moves.length -1;
+        this._tiltServo.indexIncrement = -1;
    }
    else
    {
-	this._tiltServo.index = 0;
+        this._tiltServo.index = 0;
         this._tiltServo.indexIncrement = 1;  
    }
 
    this._tilt();
 
-   if (this._scanUpdateTimer ==  null) {
-   	this._scanUpdateTimer = setInterval( this._updateScan.bind(this), this._config.scanUpdateFrequency );
+   if (this._scanUpdateTimer ==  null) 
+   {
+        this._scanUpdateTimer = setInterval( this._updateScan.bind(this), this._config.scanUpdateFrequency );
    }
 }
 
@@ -479,8 +447,6 @@ LeptonPanTiltCameraConnector.prototype._startScan = function() {
  * @protected
  */
 LeptonPanTiltCameraConnector.prototype._abortScan = function() {
-   this._logger.info('_abortScan');
-
    this._tiltServo.reset();
    this._panServo.reset();
    this._scanning = false;
@@ -494,9 +460,8 @@ LeptonPanTiltCameraConnector.prototype._abortScan = function() {
  * @protected
  */
 LeptonPanTiltCameraConnector.prototype._scanFinished = function() {
-   this._logger.info('_scanFinished scanid: ' + this._scan);
-
-   this._scanning = false;
+    this._logger.info('_scanFinished scanid: ' + this._scan);
+    this._scanning = false;
 }
 
 /**
@@ -506,8 +471,7 @@ LeptonPanTiltCameraConnector.prototype._scanFinished = function() {
  */
 LeptonPanTiltCameraConnector.prototype._updateScan = function() {
 
-   this._updateCount += 1;
-
+   // update the servos during active scans
    if (this._scanning) 
    {
 	   this._tiltServo.update();
@@ -522,57 +486,24 @@ LeptonPanTiltCameraConnector.prototype._updateScan = function() {
  */
 LeptonPanTiltCameraConnector.prototype._process = function() {
 
-     this._logger.info('_process scanning: ' + this._scanning + ' updatecounts: ' + this._updateCount);
-     this._updateCount = 0;
-
+     // do not interrupt active scan.
      if (this._scanning) 
      {
-	return;
+	    return;
      }
 
-     // start scan process
+     // start a new scan.
      this._startScan();
 }
 
- /**
- * @class LeptonPanTiltCameraConnector
- * @method __doIRCapture
- * @protected
- */
-LeptonPanTiltCameraConnector.prototype._doIRCapture = function() {
-
-     this._logger.info("_doIRCapture");
-
-     var data = null;
-     while(true)
-     {
-        data = this._captureIR();
-        if (data != null) {
-            break;
-        }
-
-        if (this._captureRetries == this._config.recaptureMaxRetries) {
-            this._logger.info('Maximum recapture retries reached - aborting scan.');
-            break;
-        }
-
-        console.log('trying ...', this._captureRetries);
-        setTimeout(this._doIRCapture.bind(this), this._config.recaptureTime);
-        this._captureRetries += 1;
-     }
-
-     return data;
-};
-
-
 /**
  * @class LeptonPanTiltCameraConnector
- * @method _process
+ * @method _captureIR
  * @protected
  */
 LeptonPanTiltCameraConnector.prototype._captureIR = function() {
 
-    this._logger.info('_captureIR scan: '+ this._scan + ' row: '+ this._row + ' col: ' + this._col);
+    var deferred = _q.defer();
 
     if(this._camera) {
 
@@ -588,8 +519,7 @@ LeptonPanTiltCameraConnector.prototype._captureIR = function() {
             rows: 0,
             cols: 0,
             delta: 0,
-	    scan: this._scan,
-            row: this._row,
+
             col: this._col
         };
         do {
@@ -639,7 +569,8 @@ LeptonPanTiltCameraConnector.prototype._captureIR = function() {
             }.bind(this));
         } while(packets.length < 60 && !abort);
 
-        if(!abort) {
+        if(!abort) 
+        {
             // Two bytes per column value.
             metadata.cols = metadata.cols/2;
             metadata.rows = packets.length;
@@ -652,21 +583,28 @@ LeptonPanTiltCameraConnector.prototype._captureIR = function() {
                     camera: {
                         metadata: metadata,
                         lines: packets,
-			rgbdata: null 
+			            rgbdata: null 
                     }
                 }
             };
 
-            //this._logger.info('Emitting sensor data for node');
-            //this.emit('data', payload);
+            // save a copy of the thermal image to file
+            if (this._config.saveToFile) 
+            {
+                this._irPacketsToFile( payload.data.camera.lines );
+            }
 
             return payload;
 
-        } else {
-            this._logger.warn('Error reading frame from camera. No data to send');
-            this._resetCamera();
+        } 
+        else 
+        {
+            var errorMsg = 'Error reading frame from camera. No data to send';
+            this._logger.warn( errorMsg );
         }
-    } else {
+    } 
+    else 
+    {
         this._logger.warn('Camera not initialized and ready');
     }
 
@@ -674,9 +612,7 @@ LeptonPanTiltCameraConnector.prototype._captureIR = function() {
 };
 
 
-LeptonPanTiltCameraConnector.prototype._doRGBCapture = function() {
-
-	this._logger.info("_doRGBCapture()");
+LeptonPanTiltCameraConnector.prototype._captureRGB = function(payload) {
 
     var deferred = _q.defer();
     var pantilt = this;
@@ -688,13 +624,13 @@ LeptonPanTiltCameraConnector.prototype._doRGBCapture = function() {
     options.settings.width = this._config.rgbWidth;;
     options.settings.height = this._config.rgbHeight;;
     options.settings.timeout = 1;
+    options.preview = ['none'];
 
     if (pantilt._config.saveToFile) {
         var tIndex = pantilt._tiltServo.index;
         var pIndex = pantilt._panServo.index;
         var tAngle = pantilt._config.moves[ tIndex ].tilt;
         var pAngle = pantilt._config.moves[ tIndex ].pans[ pIndex ];
-
         options.settings.outputPath = "./data/rgb_image_" + tAngle + "_" + pAngle + ".jpg";
     }
 
@@ -707,7 +643,8 @@ LeptonPanTiltCameraConnector.prototype._doRGBCapture = function() {
     pantilt._picam.on('snapped', function(results) 
     {
         pantilt._setEnableLights( false );
-        return deferred.resolve(results.image);
+        payload.data.camera.rgbimage = results.image.toString('base64');
+        return deferred.resolve(payload);
     }); 
 
     // handle errors
@@ -739,7 +676,6 @@ LeptonPanTiltCameraConnector.prototype._irPacketsToFile = function( packets ) {
     var pAngle = this._config.moves[ tIndex ].pans[ pIndex ];
     var path   = "./data/ir_image_" + tAngle + "_" + pAngle + ".dat";
 
-    console.log('captured: ' + path );
     _fs.writeFile(path, JSON.stringify(packets), 
         function(err) 
         {   
