@@ -76,6 +76,7 @@ RabbitBoardParser.prototype._parseResponse = function(data) {
 
         if(index === 0) {
             //this._populateTimestamp(payload.data, tokens);
+            payload.timestamp = Date.now();
             payload.id = tokens[1];
         } else if (index>1 && index<data.length - 1) {
             this._populateSensorData(payload.data, tokens);
