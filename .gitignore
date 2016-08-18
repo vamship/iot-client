@@ -1,3 +1,7 @@
+#temp image files
+data/*.jpg*
+data/*.dat*
+
 # vi swap files
 *.swp
 *.swo
